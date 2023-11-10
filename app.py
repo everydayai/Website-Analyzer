@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 
 # Access the OpenAI API key from Hugging Face Spaces secrets
-openai.api_key = st.secrets["YOUR_OPENAI_API_KEY"]
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 st.title("Investment Property Finder in Breckenridge and Blue River, CO")
 
@@ -17,12 +17,14 @@ if st.button('Find Property'):
     # Process the inputs and call the OpenAI API
     user_input = f"I'm considering buying an investment property in Breckenridge and Blue River, CO. My maximum price is {max_price}. I'm looking for these amenities: {', '.join(amenities)}. Bedrooms: {bedrooms}, Bathrooms: {bathrooms}, Square Footage: {square_footage}."
     
-    # Call the OpenAI API here with the user_input and get the response
-    response = openai.Completion.create(
-      engine="gpt-4", # Replace with your preferred model
-      prompt=user_input,
-      max_tokens=5000
+    # Call the OpenAI API with the chat model
+    response = openai.ChatCompletion.create(
+        model="gpt-4.0",  # Replace with the GPT-4 model you are using
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": user_input}
+        ]
     )
 
     # Display the response from the API
-    st.write(response.choices[0].text.strip())
+    st.write(response.choices[0].message['content'])
