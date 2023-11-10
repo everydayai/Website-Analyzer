@@ -1,8 +1,8 @@
 import streamlit as st
 import openai
 
-# Set the OpenAI API key
-openai.api_key = "YOUR_OPENAI_API_KEY"
+# Access the OpenAI API key from Hugging Face Spaces secrets
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 st.title("Investment Property Finder in Breckenridge and Blue River, CO")
 
