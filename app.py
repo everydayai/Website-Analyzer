@@ -19,7 +19,7 @@ if st.button('Find Property'):
     
     # Call the OpenAI API with the chat model
     response = openai.ChatCompletion.create(
-        model="gpt-4.0",  # Replace with the GPT-4 model you are using
+        model="gpt-4",  # Replace with the GPT-4 model you are using
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": user_input}
