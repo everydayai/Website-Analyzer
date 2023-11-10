@@ -21,7 +21,7 @@ if st.button('Find Property'):
     response = openai.Completion.create(
       engine="text-davinci-003", # Replace with your preferred model
       prompt=user_input,
-      max_tokens=150
+      max_tokens=5000
     )
 
     # Display the response from the API
