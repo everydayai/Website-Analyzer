@@ -15,7 +15,7 @@ square_footage = st.selectbox("Square Footage", ["<1000 sqft", "1000-2000 sqft",
 
 if st.button('Find Property'):
     # Process the inputs and call the OpenAI API
-    user_input = f"You are an AI assistant that provides highly specific investment property recommendations in Breckenridge and 
+    user_input = f" You are an AI assistant that provides highly specific investment property recommendations in Breckenridge and 
         Blue River, CO. Consider the user's maximum price, selected amenities, and area preferences to recommend specific neighborhoods 
         or intersections that would be a good fit for investment. Importantly, only recommend areas where short-term rentals are allowed 
         under the new law. I'm considering buying an investment property in Breckenridge and Blue River, CO. My maximum price is {max_price}. I'm 
