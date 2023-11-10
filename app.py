@@ -19,7 +19,7 @@ if st.button('Find Property'):
     
     # Call the OpenAI API here with the user_input and get the response
     response = openai.Completion.create(
-      engine="text-davinci-003", # Replace with your preferred model
+      engine="gpt-4", # Replace with your preferred model
       prompt=user_input,
       max_tokens=5000
     )
