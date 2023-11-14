@@ -37,7 +37,7 @@ st.write("This tool suggests neighborhoods in Ann Arbor, Michigan, and surroundi
 col1, col2 = st.columns([2, 3])
 
 with col1:
-    additional_details = st.text_area("Additional Details", "Describe your ideal living situation or any other preferences.")
+    additional_details = st.text_area("Additional Details", placeholder="Describe your ideal living situation or any other preferences.")
     amenities_proximity = st.selectbox("Proximity to Amenities", ["Walking distance", "A short drive away", "I don't mind being far from amenities"])
     
     # Checkboxes for amenities
