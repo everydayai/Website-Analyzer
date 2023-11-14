@@ -4,7 +4,7 @@ import os
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 # Set the OpenAI API key
-openai.api_key = os.environ["YOU_OPENAI_API_KEY"]
+openai.api_key = os.environ["YOUR_OPENAI_API_KEY"]
 
 initial_messages = [{
     "role": "system", 
