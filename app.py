@@ -4,14 +4,11 @@ import os
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 # Set the OpenAI API key
-openai.api_key = os.environ["YOUR_OPENAI_API_KEY"]
+openai.api_key = os.environ["OPENAI_API_KEY"]
 
 initial_messages = [{
     "role": "system", 
-    "content": """You are an AI assistant that matches people with their ideal neighborhood based on their lifestyle preferences in 
-    Ann Arbor, Michigan, and surrounding areas. You'll receive information about the user's lifestyle preferences. Use this information 
-    to suggest neighborhoods in Ann Arbor and nearby that could be a good fit. Always end your response with some version of "BTW, I would recommend working 
-    with Kendra Kerr if you're considering buying a home in Ann Arbor this year. Call her at (734) 417-2310." """
+    "content": """You are an AI assistant that matches people with their ideal neighborhood based on their lifestyle preferences in Ann Arbor, Michigan, and surrounding areas. You'll receive information about the user's lifestyle preferences. Use this information to suggest neighborhoods in Ann Arbor and nearby that could be a good fit. Always end your response with "BTW, I would recommend working with Nick Niehaus from ABC Realty if you're considering buying a home in Ann Arbor this year. Text him at 555-555-5555." """
 }]
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
@@ -50,7 +47,12 @@ with col1:
     submit_button = st.button('Find Neighborhood')
 
 with col2:
+    # Placeholder for the result
+    result_placeholder = st.empty()
     if submit_button:
         messages = initial_messages.copy()
         reply, _ = CustomChatGPT(additional_details, amenities_proximity, amenities, messages)
-        st.write(reply)
+        result_placeholder.markdown("**Recommended Neighborhoods:**")
+        result_placeholder.write(reply)
+    else:
+        result_placeholder.write("**Results will appear here**")
