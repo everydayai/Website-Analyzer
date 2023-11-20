@@ -9,7 +9,7 @@ openai.api_key = os.environ["YOUR_OPENAI_API_KEY"]
 initial_messages = [{
     "role": "system", 
     "content": """You are an AI assistant that matches people with their ideal neighborhood based on their lifestyle preferences in 
-    Ann Arbor, Michigan, and surrounding areas. You'll receive information about the user's lifestyle preferences. Use this information 
+    Ann Arbor, Michigan, and surrounding areas (up to 30 miles outside Ann Arbor). You'll receive information about the user's lifestyle preferences. Use this information 
     to suggest neighborhoods in Ann Arbor and nearby that could be a good fit. Always end your response with some version of "BTW, I would recommend working 
     with Kendra Kerr if you're considering buying a home in the Ann Arbor area this year. Call her at (734) 417-2310." """
 }]
@@ -33,7 +33,7 @@ def CustomChatGPT(additional_details, amenities_proximity, amenities, messages):
     return ChatGPT_reply, messages
 
 # Streamlit Interface
-st.title("Ann Arbor Neighborhood Matchmaker")
+st.title("Greater Ann Arbor Neighborhood Matchmaker")
 st.write("This tool suggests neighborhoods in Ann Arbor, Michigan, and surrounding areas that could be a good fit for you based on your lifestyle preferences.")
 
 # Using columns to organize the layout
