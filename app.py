@@ -38,26 +38,19 @@ st.title("St. Louis Area Neighborhood Matchmaker")
 st.write("This tool helps you find neighborhoods in Saint Louis, Missouri, and surrounding areas based on your lifestyle preferences.")
 
 # Using columns to organize the layout
-col1, col2, col3 = st.columns([1, 1, 2])
+col1, col2 = st.columns([2, 2])
 
 with col1:
-    # Checkboxes for amenities (Column 1)
-    amenities_list_col1 = ["Good Schools", "Parks", "Shopping Centers", "Public Transport", "Restaurants"]
-    amenities_col1 = [amenity for amenity in amenities_list_col1 if st.checkbox(amenity)]
+    # Checkboxes for amenities in two columns within col1
+    amenities_list = ["Good Schools", "Parks", "Shopping Centers", "Public Transport", "Restaurants", "Gyms", "Cafes", "Pet-friendly Areas", "Cultural Attractions", "Quiet Neighborhoods"]
+    amenities = [amenity for amenity in amenities_list if st.checkbox(amenity)]
 
-with col2:
-    # Checkboxes for amenities (Column 2)
-    amenities_list_col2 = ["Gyms", "Cafes", "Pet-friendly Areas", "Cultural Attractions", "Quiet Neighborhoods"]
-    amenities_col2 = [amenity for amenity in amenities_list_col2 if st.checkbox(amenity)]
-
-    # Combine amenities from both columns
-    amenities = amenities_col1 + amenities_col2
-    amenities_proximity = st.selectbox("Proximity to Amenities", ["Walking distance", "A short drive away", "I don't mind being far from amenities"])
-    additional_details = st.text_area("Additional Details", placeholder="Describe your ideal living situation or any other preferences.")
+    amenities_proximity = st.selectbox("Proximity to Amenities", ["Walking distance", "A short drive away", "I don't mind being far from amenities"], key="proximity")
+    additional_details = st.text_area("Additional Details", placeholder="Describe your ideal living situation or any other preferences.", key="details")
     
     submit_button = st.button('Find Neighborhood')
 
-with col3:
+with col2:
     # Placeholder for the result
     result_placeholder = st.empty()
     if submit_button:
