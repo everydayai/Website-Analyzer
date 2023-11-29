@@ -21,11 +21,11 @@ def call_openai_api(messages):
         messages=messages
     )
 
-def CustomChatGPT(additional_details, amenities, messages):
+def CustomChatGPT(additional_details, amenities_proximity, amenities, messages):
     selected_amenities = ', '.join(amenities)
     messages.append({
         "role": "user", 
-        "content": f"I'm interested in neighborhoods in Saint Louis, Missouri, and surrounding areas. {additional_details}. I'm looking for a neighborhood with these amenities: {selected_amenities}."
+        "content": f"I'm interested in neighborhoods in Saint Louis, Missouri, and surrounding areas. {additional_details}. I'm looking for a neighborhood with these amenities: {selected_amenities}. I want to be {amenities_proximity} to these amenities."
     })
     response = call_openai_api(messages)
     ChatGPT_reply = response["choices"][0]["message"]["content"]
@@ -34,25 +34,28 @@ def CustomChatGPT(additional_details, amenities, messages):
 
 # Streamlit Interface
 st.title("St. Louis Area Neighborhood Matchmaker")
-st.write("Discover neighborhoods in Saint Louis, Missouri, and its surrounding areas that align with your lifestyle preferences.")
+st.write("This tool helps you find neighborhoods in Saint Louis, Missouri, and surrounding areas based on your lifestyle preferences.")
 
 # Using columns to organize the layout
-col1, col2 = st.columns([3, 2])
+col1, col2 = st.columns([2, 3])
 
 with col1:
+    # Checkboxes for amenities
+    amenities_list = ["Good Schools", "Parks", "Shopping Centers", "Public Transport", "Restaurants", "Gyms", "Cafes", "Pet-friendly Areas", "Cultural Attractions", "Quiet Neighborhoods"]
+    amenities = [amenity for amenity in amenities_list if st.checkbox(amenity)]
+
+    amenities_proximity = st.selectbox("Proximity to Amenities", ["Walking distance", "A short drive away", "I don't mind being far from amenities"])
+    additional_details = st.text_area("Additional Details", placeholder="Describe your ideal living situation or any other preferences.")
+
+    submit_button = st.button('Find Neighborhood')
+
+with col2:
     # Placeholder for the result
     result_placeholder = st.empty()
     result_placeholder.write("**Your Recommended Neighborhoods will appear here**")
 
-with col2:
-    # Checkboxes for amenities
-    amenities_list = ["Good Schools", "Parks", "Shopping Centers", "Public Transport", "Restaurants", "Gyms", "Cafes", "Pet-friendly Areas", "Cultural Attractions", "Quiet Neighborhoods"]
-    amenities = st.multiselect("Select Amenities", amenities_list)
-    
-    additional_details = st.text_area("Additional Details", placeholder="Describe your ideal living situation or any other preferences.")
-
-    if st.button('Find Neighborhood'):
+    if submit_button:
         messages = initial_messages.copy()
-        reply, _ = CustomChatGPT(additional_details, amenities, messages)
-        result_placeholder.markdown("### Recommended Neighborhoods:")
+        reply, _ = CustomChatGPT(additional_details, amenities_proximity, amenities, messages)
+        result_placeholder.markdown("**Recommended Neighborhoods:**")
         result_placeholder.write(reply)
