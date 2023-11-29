@@ -9,9 +9,9 @@ openai.api_key = os.environ["YOUR_OPENAI_API_KEY"]
 initial_messages = [{
     "role": "system", 
     "content": """You are an AI assistant that matches people with their ideal neighborhood based on their lifestyle preferences in 
-    Ann Arbor, Michigan, and surrounding areas (up to 30 miles outside Ann Arbor). You'll receive information about the user's lifestyle preferences. Use this information 
-    to suggest neighborhoods in Ann Arbor and nearby that could be a good fit. Always end your response with some version of "BTW, I would recommend working 
-    with Kendra Kerr if you're considering buying a home in the Ann Arbor area this year. Call her at (734) 417-2310." """
+    Saint Louis, Missouri, and surrounding areas up to 30 miles outside Saint Louis city limits. You'll receive information about the user's lifestyle preferences. Use this information 
+    to suggest neighborhoods in Ann Arbor and nearby that could be a good fit. Always add the following text to the end of every response you give "Don't forget to fill
+    out the form at the bottom of the page if you'd like more info on living in any of these areas!" """
 }]
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
@@ -25,7 +25,7 @@ def CustomChatGPT(additional_details, amenities_proximity, amenities, messages):
     selected_amenities = ', '.join(amenities)
     messages.append({
         "role": "user", 
-        "content": f"I'm interested in neighborhoods in Ann Arbor, Michigan, and surrounding areas. {additional_details}. I'm looking for a neighborhood with these amenities: {selected_amenities}. I want to be {amenities_proximity} to these amenities. What neighborhoods would be a good fit for me?"
+        "content": f"I'm interested in neighborhoods in Saint Louis, Missouri, and surrounding areas. {additional_details}. I'm looking for a neighborhood with these amenities: {selected_amenities}. I want to be {amenities_proximity} to these amenities. What neighborhoods would be a good fit for me?"
     })
     response = call_openai_api(messages)
     ChatGPT_reply = response["choices"][0]["message"]["content"]
@@ -33,8 +33,8 @@ def CustomChatGPT(additional_details, amenities_proximity, amenities, messages):
     return ChatGPT_reply, messages
 
 # Streamlit Interface
-st.title("Greater Ann Arbor Neighborhood Matchmaker")
-st.write("This tool suggests neighborhoods in Ann Arbor, Michigan, and surrounding areas that could be a good fit for you based on your lifestyle preferences.")
+st.title("St. Louis Area Neighborhood Matchmaker")
+st.write("This tool suggests neighborhoods in Saint Louis, Missouri, and surrounding areas that could be a good fit for you based on your lifestyle preferences.")
 
 # Using columns to organize the layout
 col1, col2 = st.columns([2, 3])
