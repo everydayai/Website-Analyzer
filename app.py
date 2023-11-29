@@ -38,25 +38,32 @@ st.title("St. Louis Area Neighborhood Matchmaker")
 st.write("This tool helps you find neighborhoods in Saint Louis, Missouri, and surrounding areas based on your lifestyle preferences.")
 
 # Using columns to organize the layout
-col1, col2 = st.columns([2, 2])
+col1, col2 = st.columns(2)
 
 with col1:
-    # Checkboxes for amenities in two columns within col1
+    st.subheader("Your Preferences")
     amenities_list = ["Good Schools", "Parks", "Shopping Centers", "Public Transport", "Restaurants", "Gyms", "Cafes", "Pet-friendly Areas", "Cultural Attractions", "Quiet Neighborhoods"]
-    amenities = [amenity for amenity in amenities_list if st.checkbox(amenity)]
-
-    amenities_proximity = st.selectbox("Proximity to Amenities", ["Walking distance", "A short drive away", "I don't mind being far from amenities"], key="proximity")
-    additional_details = st.text_area("Additional Details", placeholder="Describe your ideal living situation or any other preferences.", key="details")
+    # Splitting amenities into two columns
+    half = len(amenities_list) // 2
+    amenities_col1, amenities_col2 = st.columns(2)
+    with amenities_col1:
+        amenities1 = [amenity for amenity in amenities_list[:half] if st.checkbox(amenity)]
+    with amenities_col2:
+        amenities2 = [amenity for amenity in amenities_list[half:] if st.checkbox(amenity)]
+    amenities = amenities1 + amenities2
     
+    amenities_proximity = st.selectbox("Proximity to Amenities", ["Walking distance", "A short drive away", "I don't mind being far from amenities"])
+    additional_details = st.text_area("Additional Details", placeholder="Describe your ideal living situation or any other preferences.")
+
     submit_button = st.button('Find Neighborhood')
 
 with col2:
     # Placeholder for the result
+    st.subheader("Recommended Neighborhoods")
     result_placeholder = st.empty()
     if submit_button:
         messages = initial_messages.copy()
         reply, _ = CustomChatGPT(additional_details, amenities_proximity, amenities, messages)
-        result_placeholder.markdown("**Recommended Neighborhoods:**")
         result_placeholder.write(reply)
     else:
-        result_placeholder.write("**Results will appear here**")
+        result_placeholder.write("**Results will appear here after you submit your preferences**")
