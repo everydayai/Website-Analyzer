@@ -17,12 +17,14 @@ details = st.text_area("Additional Details", placeholder="Any specific details t
 # Function to generate the story
 def generate_story(age_group, theme, details):
     prompt = f"Write a children's story for age group {age_group} about {theme}. Include details such as {details}."
-    response = openai.Completion.create(
+    response = openai.ChatCompletion.create(
         model="gpt-4",
-        prompt=prompt,
-        max_tokens=500  # Adjust as needed
+        messages=[
+            {"role": "system", "content": "You are a creative writer."},
+            {"role": "user", "content": prompt}
+        ]
     )
-    return response.choices[0].text
+    return response.choices[0].message['content']
 
 # Function to generate images
 def generate_image(panel_text):
