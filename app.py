@@ -5,7 +5,7 @@ from PIL import Image
 from io import BytesIO
 
 # Access the OpenAI API key from Hugging Face Spaces secrets
-openai.api_key = st.secrets["YOUR_OPENAI_API_KEY"]
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 st.title("Children's Story and Image Panel Generator")
 
@@ -16,40 +16,42 @@ details = st.text_area("Additional Details", placeholder="Any specific details t
 
 # Function to generate the story
 def generate_story(age_group, theme, details):
-    prompt = f"Write a children's story for age group {age_group} about {theme}. Include details such as {details}."
+    prompt = f"Write a concise children's story suitable for age group {age_group} about {theme}. Include details such as {details}. The story should be short enough to fit within 10 panels."
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a creative writer."},
             {"role": "user", "content": prompt}
-        ]
+        ],
+        max_tokens=300  # Adjust the token limit as needed
     )
     return response.choices[0].message['content']
 
-# Function to generate images
+# Function to generate images with DALL-E 3
 def generate_image(panel_text):
     try:
         response = openai.Image.create(
             prompt=panel_text,
             n=1,
-            size="1024x1024"  # Adjust the size if needed
+            size="1024x1024",  # Adjust the size if needed
+            model="dall-e-3"  # Specify DALL-E 3 model
         )
         image_url = response['data'][0]['url']
         image_response = requests.get(image_url)
         image = Image.open(BytesIO(image_response.content))
         return image
     except Exception as e:
+        st.error(f"Error in generating image: {e}")
         return None
 
 if st.button('Generate Story and Images'):
     story = generate_story(age_group, theme, details)
-    story_parts = story.split('.')[:10]  # Generate images for first 10 parts
+    story_parts = story.split('.')[:10]  # Use the first 10 sentences for panels
 
     for i, part in enumerate(story_parts):
-        st.subheader(f'Panel {i+1}')
-        st.write(part.strip())
-        image = generate_image(part)
-        if image:
-            st.image(image, caption=f'Image for Panel {i+1}')
-        else:
-            st.error("Error in generating image for this part of the story.")
+        if part.strip():  # Ensure part is not empty
+            st.subheader(f'Panel {i+1}')
+            st.write(part.strip())
+            image = generate_image(part)
+            if image:
+                st.image(image, caption=f'Image for Panel {i+1}')
