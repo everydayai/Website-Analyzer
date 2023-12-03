@@ -5,7 +5,7 @@ from PIL import Image
 from io import BytesIO
 
 # Access the OpenAI API key from Hugging Face Spaces secrets
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = st.secrets["YOUR_OPENAI_API_KEY"]
 
 st.title("Children's Story and Image Panel Generator")
 
