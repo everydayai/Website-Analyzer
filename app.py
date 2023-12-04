@@ -16,14 +16,14 @@ additional_details = st.text_area("Additional Details", placeholder="Any specifi
 
 # Function to generate the lead generation plan
 def generate_lead_generation_plan(business_description, target_customers, advertising_budget, additional_details):
-    prompt = f"Create a detailed lead generation plan for 2024 for a business described as follows: {business_description}. The target customers are: {target_customers}. The advertising budget is: {advertising_budget}. Additional details: {additional_details}. Include step-by-step instructions and strategies for implementing lead generation systems."
+    prompt = f"Create a specific and actionable lead generation plan for 2024 for a business described as follows: {business_description}. The target customers are: {target_customers}. The advertising budget is: {advertising_budget}. Additional details: {additional_details}. Include detailed steps, specific platforms for advertising, tools for lead capture and management, and clear action items."
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "You are a marketing expert."},
+            {"role": "system", "content": "You are a marketing expert providing actionable plans."},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=500  # Adjust the token limit as needed
+        max_tokens=700  # Adjust the token limit as needed for more detailed responses
     )
     return response.choices[0].message['content']
 
