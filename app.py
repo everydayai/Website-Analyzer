@@ -1,57 +1,42 @@
 import streamlit as st
 import openai
-import os
 
 # Access the OpenAI API key from Hugging Face Spaces secrets
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-st.title("Comprehensive Lead Generation Plan for 2024")
+st.title("AI Lead Magnet Recommender for Marketers")
 
-# User inputs for creating the lead generation plan
-st.subheader("Describe Your Business")
-business_description = st.text_area(
-    "Business Description",
-    placeholder="Briefly describe your business, including products/services offered."
-)
+# Collecting user input
+st.subheader("Tell Us About Your Business")
+business_type = st.text_input("Business Type", placeholder="e.g., Real Estate, E-commerce")
+target_audience = st.text_area("Target Audience", placeholder="Describe your primary customer base")
+current_marketing_strategies = st.text_area("Current Marketing Strategies", placeholder="Your current marketing efforts")
+business_goals = st.text_area("Business Goals and Challenges", placeholder="What do you aim to achieve with the lead magnet?")
 
-st.subheader("Target Audience")
-target_customers = st.text_area(
-    "Target Customers",
-    placeholder="Describe your ideal customers (e.g., demographics, interests)."
-)
-
-st.subheader("Budget and Preferences")
-advertising_budget = st.selectbox(
-    "Advertising Budget",
-    ["No budget", "Limited budget", "Moderate budget", "Large budget"]
-)
-additional_details = st.text_area(
-    "Additional Details",
-    placeholder="Any specific goals, strategies, or preferences?"
-)
-
-# Function to generate the lead generation plan
-def generate_lead_generation_plan(business_description, target_customers, advertising_budget, additional_details):
-    prompt = (
-        f"Create a detailed lead generation plan for 2024 for a business with the following details: "
-        f"Description: {business_description}; Target customers: {target_customers}; "
-        f"Advertising budget: {advertising_budget}. Additional details: {additional_details}. "
-        "Include specific ad placements, creative opt-in strategies, video marketing ideas, and AI lead generation tools."
+# Generate recommendations button
+if st.button('Generate AI Lead Magnet Recommendations'):
+    # Construct the prompt for the AI
+    prompt_text = (
+        f"Based on the following details, recommend AI lead magnets suitable for engaging a customer base: "
+        f"Business type: {business_type}, target audience: {target_audience}, "
+        f"current marketing strategies: {current_marketing_strategies}, business goals: {business_goals}."
     )
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a marketing expert providing detailed lead generation plans."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=700
-    )
-    return response.choices[0].message['content']
 
-# Generate and display the plan
-if st.button('Generate Lead Generation Plan'):
-    plan = generate_lead_generation_plan(
-        business_description, target_customers, advertising_budget, additional_details
-    )
-    st.subheader("Your Customized Lead Generation Plan for 2024:")
-    st.write(plan)
+    # Call the OpenAI API for text generation
+    try:
+        response_text = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a marketing expert assistant."},
+                {"role": "user", "content": prompt_text}
+            ]
+        )
+        recommendations = response_text.choices[0].message['content']
+    except Exception as e:
+        recommendations = f"Error in generating recommendations: {e}"
+
+    # Display the recommendations
+    st.markdown("### AI Lead Magnet Recommendations")
+    st.write(recommendations)
+
+# Rest of your Streamlit code...
