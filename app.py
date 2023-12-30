@@ -8,7 +8,6 @@ st.title("Personalized 6-Month Fitness and Health Plan Generator")
 
 # User inputs
 st.subheader("About You")
-name = st.text_input("Your Name", placeholder="Enter your name")
 age = st.number_input("Your Age", min_value=12, max_value=100, step=1)
 gender = st.selectbox("Your Gender", ["Female", "Male", "Prefer not to say"])
 
@@ -24,7 +23,7 @@ goal_timeframe = st.selectbox("Goal Timeframe", ["3 months", "6 months", "1 year
 if st.button('Generate My Fitness Plan'):
     # Construct the prompt for the AI
     prompt_text = (
-        f"Create a personalized 6-month fitness and health plan for {name}, a {age}-year-old {gender} with {current_fitness_level} fitness level. "
+        f"Create a personalized 6-month fitness and health plan for the user, a {age}-year-old {gender} with {current_fitness_level} fitness level. "
         f"Health issues: {current_health_issues}. Dietary preferences: {dietary_preferences}. Fitness goals: {', '.join(fitness_goals)} over {goal_timeframe}."
     )
 
