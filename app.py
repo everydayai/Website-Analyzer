@@ -4,27 +4,28 @@ import openai
 # Access the OpenAI API key from environment variables or secrets
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-st.title("Personalized 6-Month Fitness and Health Plan Generator")
+st.title("Find Your Ideal Neighborhood")
 
 # User inputs
 st.subheader("About You")
-age = st.number_input("Your Age", min_value=12, max_value=100, step=1)
-gender = st.selectbox("Your Gender", ["Female", "Male", "Prefer not to say"])
+age = st.number_input("Your Age", min_value=18, max_value=100, step=1)
+occupation = st.text_input("Your Occupation", placeholder="e.g., Software Developer, Teacher")
 
-st.subheader("Current Fitness and Health Status")
-current_fitness_level = st.selectbox("Your Current Fitness Level", ["Beginner", "Intermediate", "Advanced"])
-current_health_issues = st.text_area("Current Health Issues", placeholder="Any known health issues or concerns")
-dietary_preferences = st.text_area("Dietary Preferences", placeholder="e.g., Vegan, Gluten-free, Keto, No preferences")
+st.subheader("Lifestyle and Preferences")
+preferred_climate = st.selectbox("Preferred Climate", ["Warm", "Temperate", "Cold"])
+interests = st.text_area("Interests", placeholder="e.g., Outdoor activities, Arts and culture, Nightlife")
+housing_budget = st.number_input("Housing Budget", min_value=500, max_value=10000, step=100, format="$%i")
 
-st.subheader("Your Fitness Goals")
-fitness_goals = st.multiselect("Select Your Fitness Goals", ["Weight loss", "Muscle gain", "Endurance improvement", "Flexibility", "General well-being"])
-goal_timeframe = st.selectbox("Goal Timeframe", ["3 months", "6 months", "1 year"])
+st.subheader("Your Ideal Neighborhood")
+neighborhood_preferences = st.multiselect("Select Your Neighborhood Preferences", ["Safe", "Family-friendly", "Vibrant nightlife", "Quiet", "Pet-friendly", "Close to nature", "Urban"])
+commute_preference = st.selectbox("Preferred Commute Time", ["Less than 15 minutes", "15-30 minutes", "30-60 minutes", "More than an hour"])
 
-if st.button('Generate My Fitness Plan'):
+if st.button('Find My Ideal Neighborhood'):
     # Construct the prompt for the AI
     prompt_text = (
-        f"Create a personalized 6-month fitness and health plan for the user, a {age}-year-old {gender} with {current_fitness_level} fitness level. "
-        f"Health issues: {current_health_issues}. Dietary preferences: {dietary_preferences}. Fitness goals: {', '.join(fitness_goals)} over {goal_timeframe}."
+        f"Find an ideal neighborhood for the user, a {age}-year-old working as {occupation}. "
+        f"Preferred climate: {preferred_climate}. Interests: {interests}. Housing budget: {housing_budget}. "
+        f"Neighborhood preferences: {', '.join(neighborhood_preferences)} with a preferred commute time of {commute_preference}."
     )
 
     # Call the OpenAI API for text generation
@@ -32,17 +33,17 @@ if st.button('Generate My Fitness Plan'):
         response_text = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are an AI fitness coach."},
+                {"role": "system", "content": "You are an AI specializing in neighborhood recommendations."},
                 {"role": "user", "content": prompt_text}
             ]
         )
-        fitness_plan = response_text.choices[0].message['content']
+        neighborhood_recommendation = response_text.choices[0].message['content']
     except Exception as e:
-        fitness_plan = f"Error in generating fitness plan: {e}"
+        neighborhood_recommendation = f"Error in finding ideal neighborhood: {e}"
 
-    # Display the fitness plan
-    st.markdown("### Your Personalized 6-Month Fitness Plan")
-    st.write(fitness_plan)
+    # Display the neighborhood recommendation
+    st.markdown("### Your Ideal Neighborhood Recommendation")
+    st.write(neighborhood_recommendation)
 
 # Disclaimer
-st.write("Disclaimer: This tool provides suggestions based on AI-generated content. Please consult with a healthcare provider or a professional fitness trainer before starting any new fitness program.")
+st.write("Disclaimer: This tool provides suggestions based on AI-generated content. Please ensure to conduct your own research or consult with a real estate professional before making any decisions.")
