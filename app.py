@@ -4,28 +4,25 @@ import openai
 # Access the OpenAI API key from environment variables or secrets
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-st.title("Find Your Ideal Neighborhood")
+st.title("Plan Your Investment Strategy")
 
 # User inputs
-st.subheader("About You")
+st.subheader("Investment Profile")
 age = st.number_input("Your Age", min_value=18, max_value=100, step=1)
-occupation = st.text_input("Your Occupation", placeholder="e.g., Software Developer, Teacher")
+investment_experience = st.selectbox("Your Investment Experience", ["Beginner", "Intermediate", "Advanced"])
+investment_goal = st.text_input("Investment Goal", placeholder="e.g., Retirement, Buying a Home, Education")
 
-st.subheader("Lifestyle and Preferences")
-preferred_climate = st.selectbox("Preferred Climate", ["Warm", "Temperate", "Cold"])
-interests = st.text_area("Interests", placeholder="e.g., Outdoor activities, Arts and culture, Nightlife")
-housing_budget = st.number_input("Housing Budget", min_value=500, max_value=10000, step=100, format="$%i")
+st.subheader("Financial Information")
+annual_income = st.number_input("Annual Income", min_value=10000, max_value=1000000, step=1000, format="$%i")
+investment_amount = st.number_input("Amount Available for Investment", min_value=1000, max_value=500000, step=100, format="$%i")
+risk_tolerance = st.selectbox("Risk Tolerance", ["Low", "Medium", "High"])
 
-st.subheader("Your Ideal Neighborhood")
-neighborhood_preferences = st.multiselect("Select Your Neighborhood Preferences", ["Safe", "Family-friendly", "Vibrant nightlife", "Quiet", "Pet-friendly", "Close to nature", "Urban"])
-commute_preference = st.selectbox("Preferred Commute Time", ["Less than 15 minutes", "15-30 minutes", "30-60 minutes", "More than an hour"])
-
-if st.button('Find My Ideal Neighborhood'):
+if st.button('Generate My Investment Strategy'):
     # Construct the prompt for the AI
     prompt_text = (
-        f"Find an ideal neighborhood for the user, a {age}-year-old working as {occupation}. "
-        f"Preferred climate: {preferred_climate}. Interests: {interests}. Housing budget: {housing_budget}. "
-        f"Neighborhood preferences: {', '.join(neighborhood_preferences)} with a preferred commute time of {commute_preference}."
+        f"Generate an investment strategy for a {age}-year-old with {investment_experience} experience. "
+        f"Investment goal: {investment_goal}. Annual income: {annual_income}. "
+        f"Amount available for investment: {investment_amount}. Risk tolerance: {risk_tolerance}."
     )
 
     # Call the OpenAI API for text generation
@@ -33,17 +30,17 @@ if st.button('Find My Ideal Neighborhood'):
         response_text = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are an AI specializing in neighborhood recommendations."},
+                {"role": "system", "content": "You are an AI specializing in personalized investment strategies."},
                 {"role": "user", "content": prompt_text}
             ]
         )
-        neighborhood_recommendation = response_text.choices[0].message['content']
+        investment_strategy = response_text.choices[0].message['content']
     except Exception as e:
-        neighborhood_recommendation = f"Error in finding ideal neighborhood: {e}"
+        investment_strategy = f"Error in generating investment strategy: {e}"
 
-    # Display the neighborhood recommendation
-    st.markdown("### Your Ideal Neighborhood Recommendation")
-    st.write(neighborhood_recommendation)
+    # Display the investment strategy
+    st.markdown("### Your Personalized Investment Strategy")
+    st.write(investment_strategy)
 
 # Disclaimer
-st.write("Disclaimer: This tool provides suggestions based on AI-generated content. Please ensure to conduct your own research or consult with a real estate professional before making any decisions.")
+st.write("Disclaimer: This tool provides suggestions based on AI-generated content. Please ensure to conduct your own research or consult with a financial advisor before making any investment decisions.")
