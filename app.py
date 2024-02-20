@@ -13,8 +13,8 @@ investment_experience = st.selectbox("Your Investment Experience", ["Beginner", 
 investment_goal = st.text_input("Investment Goal", placeholder="e.g., Retirement, Buying a Home, Education")
 
 st.subheader("Financial Information")
-annual_income = st.number_input("Annual Income", min_value=10000, max_value=1000000, step=1000, format="$%i")
-investment_amount = st.number_input("Amount Available for Investment", min_value=1000, max_value=500000, step=100, format="$%i")
+annual_income = st.number_input("Annual Income", min_value=10000, max_value=1000000, step=1000)  # Removed format argument
+investment_amount = st.number_input("Amount Available for Investment", min_value=1000, max_value=500000, step=100)  # Removed format argument
 risk_tolerance = st.selectbox("Risk Tolerance", ["Low", "Medium", "High"])
 
 if st.button('Generate My Investment Strategy'):
