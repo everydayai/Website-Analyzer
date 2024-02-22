@@ -1,46 +1,53 @@
 import streamlit as st
 import openai
 
-# Access the OpenAI API key from environment variables or secrets
+# Access the OpenAI API key from Hugging Face Spaces secrets or your environment variables
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-st.title("Plan Your Investment Strategy")
+st.title("Video Script Generator")
 
-# User inputs
-st.subheader("Investment Profile")
-age = st.number_input("Your Age", min_value=18, max_value=100, step=1)
-investment_experience = st.selectbox("Your Investment Experience", ["Beginner", "Intermediate", "Advanced"])
-investment_goal = st.text_input("Investment Goal", placeholder="e.g., Retirement, Buying a Home, Education")
+# Define video styles and their descriptions
+video_styles = {
+    "Explainer": "Explainer videos break down complex concepts into simple, engaging visuals and narratives.",
+    "Testimonial": "Testimonial videos feature satisfied customers sharing their positive experiences.",
+    "Product Demo": "Product demos showcase the features and benefits of a product in action.",
+    "How-To": "How-to videos provide step-by-step instructions on performing a task or using a product.",
+    "Brand Story": "Brand story videos share the company's mission, vision, and values, connecting emotionally with the audience."
+}
 
-st.subheader("Financial Information")
-annual_income = st.number_input("Annual Income", min_value=10000, max_value=1000000, step=1000)  # Removed format argument
-investment_amount = st.number_input("Amount Available for Investment", min_value=1000, max_value=500000, step=100)  # Removed format argument
-risk_tolerance = st.selectbox("Risk Tolerance", ["Low", "Medium", "High"])
+# User selects the video style
+video_style = st.selectbox("Choose the style of video you want to create:", options=list(video_styles.keys()))
 
-if st.button('Generate My Investment Strategy'):
+# Display the description of the selected video style
+st.write(f"**Description:** {video_styles[video_style]}")
+
+# Additional inputs
+business_name = st.text_input("Business Name", "Your Business Name")
+target_audience = st.text_area("Target Audience", "Describe your target audience.")
+
+# Button to generate video script
+if st.button('Generate Video Script'):
     # Construct the prompt for the AI
-    prompt_text = (
-        f"Generate an investment strategy for a {age}-year-old with {investment_experience} experience. "
-        f"Investment goal: {investment_goal}. Annual income: {annual_income}. "
-        f"Amount available for investment: {investment_amount}. Risk tolerance: {risk_tolerance}."
-    )
-
+    prompt_text = f"Create a script for a {video_style.lower()} video for '{business_name}' targeting '{target_audience}'. {video_styles[video_style]}"
+    
     # Call the OpenAI API for text generation
     try:
-        response_text = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are an AI specializing in personalized investment strategies."},
-                {"role": "user", "content": prompt_text}
-            ]
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt_text,
+            max_tokens=500,
+            temperature=0.7,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
         )
-        investment_strategy = response_text.choices[0].message['content']
+        script = response.choices[0].text.strip()
     except Exception as e:
-        investment_strategy = f"Error in generating investment strategy: {e}"
-
-    # Display the investment strategy
-    st.markdown("### Your Personalized Investment Strategy")
-    st.write(investment_strategy)
+        script = f"Error in generating script: {e}"
+    
+    # Display the generated script
+    st.markdown("### Generated Video Script")
+    st.write(script)
 
 # Disclaimer
-st.write("Disclaimer: This tool provides suggestions based on AI-generated content. Please ensure to conduct your own research or consult with a financial advisor before making any investment decisions.")
+st.write("Disclaimer: This tool provides AI-generated suggestions. Please review and customize the script to fit your specific business needs.")
