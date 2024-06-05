@@ -1,48 +1,39 @@
 import streamlit as st
 import openai
 
-# Initializing Streamlit app
-st.title("AI Integration Assessment for Businesses")
+def main():
+    st.title("Email Subject Line Generator")
 
-# Securely accessing the OpenAI API key
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+    # Collect user input about the audience and message
+    audience_desc = st.text_input("Describe your audience (e.g., age, interests, profession):", "e.g., middle-aged professionals interested in sustainability")
+    message_content = st.text_area("What is the main message or offer of your email?", "e.g., Inviting you to join our sustainability webinar")
 
-# Function to call OpenAI API using GPT-4o
-def call_openai_api(prompt):
+    # Button to generate email subject lines
+    if st.button('Generate Email Subject Lines'):
+        subject_lines = generate_subject_lines(audience_desc, message_content)
+        if subject_lines:
+            st.subheader("Suggested Email Subject Lines and Preheaders:")
+            for idx, line in enumerate(subject_lines, 1):
+                st.text(f"{idx}. {line}")
+        else:
+            st.error("Failed to generate subject lines. Please try again.")
+
+def generate_subject_lines(audience, message):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4o",  # Specify GPT-4o as the model
-            messages=[
-                {"role": "system", "content": prompt['system']},
-                {"role": "user", "content": prompt['user']}
-            ]
+        # OpenAI API call to generate subject lines
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=f"Generate 10 compelling email subject lines and preheaders for an audience that includes {audience}, regarding the following message: {message}",
+            max_tokens=150,
+            n=10,
+            stop=None,
+            temperature=0.7
         )
-        return response.choices[0].message['content']
+        # Extracting text from the responses
+        return [choice['text'].strip() for choice in response.choices]
     except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
+        st.error(f"An error occurred while generating subject lines: {str(e)}")
         return None
 
-# Streamlit UI for input
-business_type = st.text_input("Describe your business type and main activities:", "e.g., Manufacturing")
-current_tech_usage = st.text_input("Describe current technology usage in your business:", "e.g., Mostly manual processes with some Excel usage")
-ai_interest_areas = st.multiselect("Select potential areas for AI integration:", 
-                                   ["Customer Service", "Operations", "Marketing", "Risk Management", "Product Development"])
-
-generate_button = st.button('Generate AI Integration Report')
-
-# Handling the button click
-if generate_button:
-    user_prompt = {
-        "system": """
-        You are an AI consultant tasked with evaluating a business to determine where AI can be effectively integrated. Provide a detailed report that assesses the current technology usage and recommends areas for AI implementation based on the business type and interests.""",
-        "user": f"""
-        Business Type: {business_type}
-        Current Technology Usage: {current_tech_usage}
-        Interest Areas: {', '.join(ai_interest_areas)}"""
-    }
-    report = call_openai_api(user_prompt)
-    if report:
-        st.markdown("### AI Integration Report")
-        st.write(report)
-    else:
-        st.write("An error occurred while generating the report. Please try again.")
+if __name__ == "__main__":
+    main()
