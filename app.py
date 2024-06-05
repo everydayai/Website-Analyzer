@@ -22,7 +22,7 @@ def generate_subject_lines(audience, message):
     try:
         # OpenAI API call to generate subject lines
         response = openai.Completion.create(
-            model="text-davinci-003",
+            model="gpt-4o",
             prompt=f"Generate 10 compelling email subject lines and preheaders for an audience that includes {audience}, regarding the following message: {message}",
             max_tokens=150,
             n=10,
