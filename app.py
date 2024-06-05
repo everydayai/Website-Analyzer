@@ -17,7 +17,7 @@ def main():
         if subject_lines:
             st.subheader("Suggested Email Subject Lines and Preheaders:")
             for idx, line in enumerate(subject_lines, 1):
-                st.text(f"{idx}. {line}")
+                st.markdown(f"- **{idx}**: {line}")  # Use markdown to format the list
         else:
             st.error("Failed to generate subject lines. Please try again.")
 
