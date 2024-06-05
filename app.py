@@ -7,7 +7,7 @@ def main():
     # Streamlit app setup to use secrets for API key management
     openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-    # Collect user input about the audience, message, and tone
+    # Collect user input about the audience, message, and desired tone
     audience_desc = st.text_input("Describe your audience (e.g., age, interests, profession):", value="", placeholder="e.g., middle-aged professionals interested in sustainability")
     message_content = st.text_area("What is the main message or offer of your email?", value="", placeholder="e.g., Inviting you to join our sustainability webinar")
     tone = st.selectbox("Choose the tone for your email subject lines:", ['Friendly', 'Professional', 'Urgent', 'Curious', 'Humorous', 'Informative'])
