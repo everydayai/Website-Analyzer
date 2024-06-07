@@ -30,7 +30,7 @@ def generate_subject_lines_and_preheaders(audience, message, tone):
         response = openai.ChatCompletion.create(
             model="gpt-4o",
             messages=[{"role": "system", "content": prompt_text}],
-            max_tokens=500  # Appropriate token count to ensure complete responses
+            max_tokens=500  # Appropriately high token limit for detailed responses
         )
         subject_lines = [choice['message']['content'].split('\n')[0] for choice in response.choices if '\n' in choice['message']['content']]
         preheaders = [choice['message']['content'].split('\n')[1] for choice in response.choices if '\n' in choice['message']['content']]
