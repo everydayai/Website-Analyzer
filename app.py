@@ -21,7 +21,8 @@ def main():
 
 def generate_subject_lines_and_preheaders(audience, message, tone):
     try:
-        prompt_text = f"Generate 5 pairs of compelling email subject lines and preheaders for {audience}, message: {message}, tone: {tone}. Each subject line should be under 7 words, and each preheader should complement the subject line."
+        prompt_text = f"""Generate 10 pairs of compelling email subject lines and preheaders for {audience}, message: {message}, tone: {tone}. 
+        Each subject line should be under 7 words, and each preheader should complement the subject line."""
         response = openai.ChatCompletion.create(
             model="gpt-4o",
             messages=[{"role": "system", "content": prompt_text}]
