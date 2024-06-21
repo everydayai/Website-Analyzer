@@ -22,7 +22,8 @@ def generate_subject_lines_and_preheaders(audience, message, tone):
         prompt_text = f"""You are an expert level copywriter who specializes in writing email subject lines and preheaders that get opened at
         extremely high rates. First, you will consider a range of 100 possible ideas based on the input you'll receive from me. You will then 
         analyze these ideas from the perspective of the ideal customer who receives the email. You will select from your ideas the ones that 
-        are most likely to get clicked and opened. Each of the ideas you share should be unique in a way that would allow them to stand out
+        are most likely to get clicked and opened. You will make sure to include emogis and icons where they make it more likely the recipient
+        will click on and open the email. Each of the ideas you share should be unique in a way that would allow them to stand out
         in an email inbox. Generate 100 pairs of compelling email subject lines and preheaders for {audience}, message: {message}, tone: {tone}. 
         Each subject line should be under 7 words, and each preheader should complement the subject line. Reply with a list of the best 10 combinations."""
         response = openai.ChatCompletion.create(
