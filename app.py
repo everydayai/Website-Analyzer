@@ -40,6 +40,10 @@ def CustomChatGPT(preferences, messages):
 # Set layout to wide
 st.set_page_config(layout="wide")
 
+# Initialize session state for storing the results
+if "reply" not in st.session_state:
+    st.session_state.reply = ""
+
 # Centered title
 st.markdown("<h1 style='text-align: center; color: black;'>Neighborhood Matchmaker</h1>", unsafe_allow_html=True)
 
@@ -54,10 +58,12 @@ with col1:
 if generate_button:
     messages = initial_messages.copy()
     reply, _ = CustomChatGPT(preferences, messages)
+    st.session_state.reply = reply  # Store the reply in session state
 
+if st.session_state.reply:
     with col2:
         st.markdown("<h2 style='text-align: center; color: black;'>Recommended Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
-        st.write(reply)
+        st.write(st.session_state.reply)
 
         # Add map integration
         st.markdown("<h2 style='text-align: center; color: black;'>Map of Suggested Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
