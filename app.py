@@ -3,9 +3,18 @@ import openai
 import os
 import folium
 from streamlit_folium import st_folium
+import urllib.parse
+import subprocess
 
 # Ensure your OpenAI API key is set in your environment variables
 openai.api_key = os.environ["OPENAI_API_KEY"]
+
+# Ensure folium is installed
+try:
+    import folium
+except ModuleNotFoundError:
+    subprocess.check_call(["python", "-m", "pip", "install", "folium"])
+    import folium
 
 initial_messages = [{
     "role": "system",
@@ -23,8 +32,11 @@ def call_openai_api(messages):
 def CustomChatGPT(preferences, messages):
     query = f"User preferences: {preferences}. Suggest suitable neighborhoods."
     messages.append({"role": "user", "content": query})
-    response = call_openai_api(messages)
-    ChatGPT_reply = response["choices"][0]["message"]["content"]
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=messages
+    )
+    ChatGPT_reply = response.choices[0].message.content
     messages.append({"role": "assistant", "content": ChatGPT_reply})
     return ChatGPT_reply, messages
 
@@ -69,6 +81,13 @@ with col2:
             ).add_to(m)
 
         st_folium(m, width=700, height=500)
+
+        # Add Zillow search links for neighborhoods
+        st.markdown("<h2 style='text-align: center; color: black;'>Search for Homes in Suggested Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
+        for neighborhood in neighborhoods:
+            query = urllib.parse.quote(neighborhood["name"])
+            zillow_url = f"https://www.zillow.com/homes/{query}_rb/"
+            st.markdown(f"[Search for homes in {neighborhood['name']} on Zillow]({zillow_url})")
 
 # Contact capture form
 st.markdown("<h2 style='text-align: center; color: black;'>Get in Touch for More Details ⬇️</h2>", unsafe_allow_html=True)
