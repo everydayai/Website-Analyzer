@@ -51,11 +51,12 @@ with col1:
     preferences = st.text_area("Describe your ideal neighborhood", placeholder="E.g., family-friendly, good schools, near parks, vibrant nightlife, public transportation, etc.")
     generate_button = st.button('Find Neighborhoods')
 
-with col2:
-    st.markdown("<h2 style='text-align: center; color: black;'>Recommended Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
-    if generate_button:
-        messages = initial_messages.copy()
-        reply, _ = CustomChatGPT(preferences, messages)
+if generate_button:
+    messages = initial_messages.copy()
+    reply, _ = CustomChatGPT(preferences, messages)
+
+    with col2:
+        st.markdown("<h2 style='text-align: center; color: black;'>Recommended Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
         st.write(reply)
 
         # Add map integration
