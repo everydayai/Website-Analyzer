@@ -1,41 +1,82 @@
 import streamlit as st
 import openai
+import os
+import folium
+from streamlit_folium import st_folium
 
-def main():
-    st.title("Blog Post Idea and Outline Generator")
+# Ensure your OpenAI API key is set in your environment variables
+openai.api_key = os.environ["OPENAI_API_KEY"]
 
-    openai.api_key = st.secrets["OPENAI_API_KEY"]
+initial_messages = [{
+    "role": "system",
+    "content": """
+        You are a neighborhood matchmaker. Given a person's preferences in terms of amenities, lifestyle, and priorities, suggest three neighborhoods that best match their needs. Provide a short description for each neighborhood, including key features such as nearby amenities, atmosphere, and suitability for the user's preferences.
+        """
+}]
 
-    blog_topic = st.text_input("Enter your blog topic:", value="", placeholder="e.g., Artificial Intelligence in Healthcare")
-    target_audience = st.text_input("Describe your target audience:", value="", placeholder="e.g., healthcare professionals")
-    post_length = st.selectbox("Choose the length of your blog post:", ['Short (500 words)', 'Medium (1000 words)', 'Long (1500+ words)'])
+def call_openai_api(messages):
+    return openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=messages
+    )
 
-    if st.button('Generate Blog Post Ideas and Outlines'):
-        response = generate_blog_ideas_and_outlines(blog_topic, target_audience, post_length)
-        if response:
-            st.subheader("Suggested Blog Post Ideas and Outlines:")
-            st.write(response)
-        else:
-            st.error("Failed to generate blog post ideas and outlines. Please check the inputs and try again.")
+def CustomChatGPT(preferences, messages):
+    query = f"User preferences: {preferences}. Suggest suitable neighborhoods."
+    messages.append({"role": "user", "content": query})
+    response = call_openai_api(messages)
+    ChatGPT_reply = response["choices"][0]["message"]["content"]
+    messages.append({"role": "assistant", "content": ChatGPT_reply})
+    return ChatGPT_reply, messages
 
-def generate_blog_ideas_and_outlines(topic, audience, length):
-    try:
-        prompt_text = f"""As an expert content strategist and writer, create 5 unique blog post ideas on the topic of {topic} for {audience}. For each idea, provide a brief outline suitable for a {length} post. Each outline should include:
-        1. An attention-grabbing title
-        2. 3-5 main sections with brief descriptions
-        3. A concluding thought or call-to-action
+# Set layout to wide
+st.set_page_config(layout="wide")
 
-        Ensure that each idea is distinct and tailored to the interests and needs of the target audience."""
+# Centered title
+st.markdown("<h1 style='text-align: center; color: black;'>Neighborhood Matchmaker</h1>", unsafe_allow_html=True)
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "system", "content": prompt_text}],
-            max_tokens=1000
-        )
-        return response.choices[0].message['content']
-    except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
-        return None
+# Create columns for input and output
+col1, col2 = st.columns(2)
 
-if __name__ == "__main__":
-    main()
+with col1:
+    st.markdown("<h2 style='text-align: center; color: black;'>Your Preferences</h2>", unsafe_allow_html=True)
+    preferences = st.text_area("Describe your ideal neighborhood", placeholder="E.g., family-friendly, good schools, near parks, vibrant nightlife, public transportation, etc.")
+    generate_button = st.button('Find Neighborhoods')
+
+with col2:
+    st.markdown("<h2 style='text-align: center; color: black;'>Recommended Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
+    if generate_button:
+        messages = initial_messages.copy()
+        reply, _ = CustomChatGPT(preferences, messages)
+        st.write(reply)
+
+        # Add map integration
+        st.markdown("<h2 style='text-align: center; color: black;'>Map of Suggested Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
+        map_center = [37.7749, -122.4194]  # Default to San Francisco coordinates
+        m = folium.Map(location=map_center, zoom_start=12)
+
+        # Placeholder coordinates for neighborhoods (these should be updated with actual data)
+        neighborhoods = [
+            {"name": "Neighborhood 1", "coordinates": [37.7749, -122.4194]},
+            {"name": "Neighborhood 2", "coordinates": [37.7849, -122.4094]},
+            {"name": "Neighborhood 3", "coordinates": [37.7649, -122.4294]}
+        ]
+
+        for neighborhood in neighborhoods:
+            folium.Marker(
+                location=neighborhood["coordinates"],
+                popup=neighborhood["name"],
+                icon=folium.Icon(color='blue')
+            ).add_to(m)
+
+        st_folium(m, width=700, height=500)
+
+# Contact capture form
+st.markdown("<h2 style='text-align: center; color: black;'>Get in Touch for More Details ⬇️</h2>", unsafe_allow_html=True)
+with st.form(key='contact_form'):
+    name = st.text_input("Your Name", placeholder="Enter your name")
+    email = st.text_input("Your Email", placeholder="Enter your email address")
+    message = st.text_area("Your Message", placeholder="Let us know how we can assist you further")
+    submit_button = st.form_submit_button(label='Submit')
+
+    if submit_button:
+        st.success("Thank you for getting in touch! We'll get back to you shortly.")
