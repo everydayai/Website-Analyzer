@@ -33,7 +33,7 @@ def CustomChatGPT(preferences, messages):
     query = f"User preferences: {preferences}. Suggest suitable neighborhoods."
     messages.append({"role": "user", "content": query})
     response = call_openai_api(messages)
-    ChatGPT_reply = response["choices"][0]["message"]["content"]
+    ChatGPT_reply = response.choices[0].message["content"]
     messages.append({"role": "assistant", "content": ChatGPT_reply})
     return ChatGPT_reply, messages
 
