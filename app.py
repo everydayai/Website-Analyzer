@@ -57,12 +57,13 @@ if st.session_state["reply"]:
         st.markdown("<h2 style='text-align: center; color: black;'>Recommended Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
         st.write(st.session_state["reply"])
         
-        # Extract neighborhood, city, and state information
+        # Extract neighborhood, city, and state information accurately
         neighborhoods = []
         for line in st.session_state["reply"].splitlines():
-            if ":" in line:
-                location = line.split(":")[0].strip()  # Full location "Neighborhood, City, State"
-                # Remove any leading numbering
+            # Look for lines in the format "Neighborhood: Location: ..."
+            if "Location:" not in line and "Description:" not in line and ":" in line:
+                location = line.split(":")[0].strip()  # Get "Neighborhood, City, State"
+                # Remove any leading numbering if it exists
                 if location[0].isdigit():
                     location = location.split(" ", 1)[1].strip()
                 neighborhoods.append(location)
