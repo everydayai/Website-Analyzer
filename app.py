@@ -9,14 +9,15 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 initial_messages = [{
     "role": "system",
     "content": """
-        You are a neighborhood matchmaker. Given a person's preferences in terms of amenities, lifestyle, and priorities, suggest three neighborhoods that best match their needs in a specified city. For each neighborhood, include the full location in the format: Neighborhood, City, State, and provide a short description highlighting its unique qualities.
+        You are a neighborhood matchmaker. Given a person's preferences in terms of amenities, lifestyle, and priorities, suggest three neighborhoods that best match their needs in a specified city. For each neighborhood, provide the full location in the format: Neighborhood, City, State, and keep descriptions concise (one or two sentences).
     """
 }]
 
 def call_openai_api(messages):
     return openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=messages
+        messages=messages,
+        max_tokens=300  # Limit tokens to keep responses concise
     )
 
 def CustomChatGPT(city, preferences, messages):
@@ -60,11 +61,9 @@ if st.session_state["reply"]:
         # Extract neighborhood, city, and state information accurately
         neighborhoods = []
         for line in st.session_state["reply"].splitlines():
-            # Look for lines in the format "Neighborhood: Location: ..."
             if "Location:" not in line and "Description:" not in line and ":" in line:
-                location = line.split(":")[0].strip()  # Get "Neighborhood, City, State"
-                # Remove any leading numbering if it exists
-                if location[0].isdigit():
+                location = line.split(":")[0].strip()  # Full location "Neighborhood, City, State"
+                if location[0].isdigit():  # Remove any leading numbering
                     location = location.split(" ", 1)[1].strip()
                 neighborhoods.append(location)
         
