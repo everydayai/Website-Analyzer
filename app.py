@@ -57,6 +57,9 @@ if generate_button and city and preferences:
         for line in reply.splitlines():
             if ":" in line:
                 location = line.split(":")[0].strip()  # Full location "Neighborhood, City, State"
+                # Remove any leading numbering
+                if location[0].isdigit():
+                    location = location.split(" ", 1)[1].strip()
                 neighborhoods.append(location)
         
         # Display Zillow links
