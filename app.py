@@ -56,4 +56,16 @@ if generate_button and city and preferences:
         neighborhoods = []
         for line in reply.splitlines():
             if ":" in line:
-                neighborhood = line.split("
+                neighborhood = line.split(":")[0].strip()
+                neighborhoods.append(neighborhood)
+        
+        # Format city correctly for Zillow URLs
+        city_formatted = urllib.parse.quote(city.strip().title())
+        
+        # Display Zillow links
+        st.markdown("### Zillow Search Links")
+        for neighborhood in neighborhoods:
+            neighborhood_query = urllib.parse.quote(f"{neighborhood}, {city_formatted}")
+            zillow_url = f"https://www.zillow.com/homes/{neighborhood_query}_rb/"
+            st.markdown(f"- [Search for homes in {neighborhood}, {city} on Zillow]({zillow_url})")
+
