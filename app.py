@@ -62,9 +62,16 @@ if generate_button and city and preferences:
                     location = location.split(" ", 1)[1].strip()
                 neighborhoods.append(location)
         
-        # Display Zillow links
+        # Display Zillow links, focusing on city and state first, then adding neighborhood if needed
         st.markdown("### Zillow Search Links")
         for location in neighborhoods:
-            location_query = urllib.parse.quote(location)
-            zillow_url = f"https://www.zillow.com/homes/{location_query}_rb/"
+            # Simplify the search query to prevent Zillow from returning specific listings
+            city_state_query = urllib.parse.quote(f"{city}, {location.split(',')[-1].strip()}")
+            zillow_url = f"https://www.zillow.com/homes/{city_state_query}_rb/"
+            
+            # Add neighborhood to query if broader city/state search isn't suitable
+            if city.lower() not in location.lower():
+                location_query = urllib.parse.quote(location)
+                zillow_url = f"https://www.zillow.com/homes/{location_query}_rb/"
+            
             st.markdown(f"- [Search for homes in {location} on Zillow]({zillow_url})")
