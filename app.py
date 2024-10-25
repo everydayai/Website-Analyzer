@@ -6,6 +6,21 @@ import urllib.parse
 # Ensure your OpenAI API key is set in your environment variables
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
+# Mapping of state names to abbreviations
+STATE_ABBREVIATIONS = {
+    'alabama': 'al', 'alaska': 'ak', 'arizona': 'az', 'arkansas': 'ar', 'california': 'ca', 
+    'colorado': 'co', 'connecticut': 'ct', 'delaware': 'de', 'florida': 'fl', 'georgia': 'ga', 
+    'hawaii': 'hi', 'idaho': 'id', 'illinois': 'il', 'indiana': 'in', 'iowa': 'ia', 
+    'kansas': 'ks', 'kentucky': 'ky', 'louisiana': 'la', 'maine': 'me', 'maryland': 'md', 
+    'massachusetts': 'ma', 'michigan': 'mi', 'minnesota': 'mn', 'mississippi': 'ms', 'missouri': 'mo', 
+    'montana': 'mt', 'nebraska': 'ne', 'nevada': 'nv', 'new hampshire': 'nh', 'new jersey': 'nj', 
+    'new mexico': 'nm', 'new york': 'ny', 'north carolina': 'nc', 'north dakota': 'nd', 
+    'ohio': 'oh', 'oklahoma': 'ok', 'oregon': 'or', 'pennsylvania': 'pa', 'rhode island': 'ri', 
+    'south carolina': 'sc', 'south dakota': 'sd', 'tennessee': 'tn', 'texas': 'tx', 
+    'utah': 'ut', 'vermont': 'vt', 'virginia': 'va', 'washington': 'wa', 'west virginia': 'wv', 
+    'wisconsin': 'wi', 'wyoming': 'wy'
+}
+
 initial_messages = [{
     "role": "system",
     "content": """
@@ -55,10 +70,13 @@ def format_zillow_search(neighborhood_info):
     # Prepare each component by converting to lowercase and replacing spaces with hyphens
     neighborhood = '-'.join(neighborhood_info['neighborhood'].lower().split())
     city = '-'.join(neighborhood_info['city'].lower().split())
-    state = neighborhood_info['state'].lower()[:2]  # Use state abbreviation
+    
+    # Convert full state name to abbreviation if needed
+    state = neighborhood_info['state'].lower()
+    state_abbr = STATE_ABBREVIATIONS.get(state, state[:2])  # Use abbreviation or the first two letters if already abbreviated
     
     # Format the search path as 'neighborhood-in-city-state'
-    search_path = f"{neighborhood}-in-{city}-{state}"
+    search_path = f"{neighborhood}-in-{city}-{state_abbr}"
     return f"https://www.zillow.com/homes/{search_path}_rb/"
 
 def CustomChatGPT(city, preferences, messages):
