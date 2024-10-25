@@ -46,14 +46,16 @@ with col1:
 if generate_button and city and preferences:
     messages = initial_messages.copy()
     reply, _ = CustomChatGPT(city, preferences, messages)
-
+    
     # Display the results
     with col2:
         st.markdown("<h2 style='text-align: center; color: black;'>Recommended Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
         st.write(reply)
-
-        # Display Zillow links for each neighborhood
-        neighborhoods = reply.splitlines()
+        
+        # Extract and display neighborhood names with Zillow links
+        neighborhoods = [line.split(":")[0].strip() for line in reply.splitlines() if line]  # Extract name before ":"
+        
+        st.markdown("### Zillow Search Links")
         for neighborhood in neighborhoods:
             neighborhood_query = urllib.parse.quote(neighborhood)
             zillow_url = f"https://www.zillow.com/homes/{neighborhood_query}_rb/"
