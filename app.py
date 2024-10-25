@@ -58,21 +58,20 @@ if st.session_state["reply"]:
         st.markdown("<h2 style='text-align: center; color: black;'>Recommended Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
         st.write(st.session_state["reply"])
         
-        # Extract neighborhood, city, and state information accurately
+        # Extract only lines with the format "Neighborhood, City, State:"
         neighborhoods = []
         for line in st.session_state["reply"].splitlines():
-            # Only capture lines that start with a neighborhood and contain a comma
-            if line and "," in line:
-                location = line.split("-")[0].strip()  # Capture everything before the description
+            if line and "," in line and ":" in line:  # Ensure it matches "Neighborhood, City, State:"
+                location = line.split(":")[0].strip()  # Capture up to the first colon
+                # Remove any numbering
+                if location[0].isdigit():
+                    location = location.split(" ", 1)[1].strip()
                 neighborhoods.append(location)
         
-        # Debugging step: Check if neighborhoods list is populated
-        st.write("Extracted Neighborhoods:", neighborhoods)
-
-        # Display Zillow links, ensuring neighborhood and city are included in each URL
+        # Display Zillow links
         st.markdown("### Zillow Search Links")
         for location in neighborhoods:
-            # Ensure format "Neighborhood, City, State" for the search query
+            # Format the search query correctly
             full_location_query = urllib.parse.quote(location)
             zillow_url = f"https://www.zillow.com/homes/{full_location_query}_rb/"
             
