@@ -53,20 +53,18 @@ def parse_neighborhoods(response_text):
 
 def format_zillow_search(neighborhood_info):
     """
-    Format the location string for Zillow search.
-    Uses Zillow's homes search format with the neighborhood name in the query.
+    Format the location string for Zillow search using their neighborhood search parameters.
     """
-    # Clean and format the search terms
-    clean_neighborhood = neighborhood_info['neighborhood'].replace('&', 'and')
-    clean_city = neighborhood_info['city']
-    clean_state = neighborhood_info['state']
+    # Clean and prepare the search terms
+    neighborhood = neighborhood_info['neighborhood']
+    city = neighborhood_info['city']
+    state = neighborhood_info['state']
     
-    # Create the search query
-    search_query = f"{clean_neighborhood} {clean_city} {clean_state}"
-    encoded_query = urllib.parse.quote(search_query)
+    # Create the search string
+    search_term = f"{neighborhood} {city} {state}"
+    encoded_search = urllib.parse.quote(search_term)
     
-    # Use Zillow's current search URL format
-    return f"https://www.zillow.com/homes/{encoded_query}_rb/"
+    return f"https://www.zillow.com/homes/for_sale/{encoded_search}"
 
 def CustomChatGPT(city, preferences, messages):
     query = f"""
