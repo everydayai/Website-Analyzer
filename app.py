@@ -9,7 +9,7 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 initial_messages = [{
     "role": "system",
     "content": """
-        You are a neighborhood matchmaker. Given a person's preferences in terms of amenities, lifestyle, and priorities, suggest three neighborhoods that best match their needs in a specified city. Provide a short description of each neighborhood, highlighting its unique qualities.
+        You are a neighborhood matchmaker. Given a person's preferences in terms of amenities, lifestyle, and priorities, suggest three neighborhoods that best match their needs in a specified city. For each neighborhood, include the full location in the format: Neighborhood, City, State, and provide a short description highlighting its unique qualities.
     """
 }]
 
@@ -20,7 +20,7 @@ def call_openai_api(messages):
     )
 
 def CustomChatGPT(city, preferences, messages):
-    query = f"User is looking for neighborhoods in {city} with these preferences: {preferences}. Suggest suitable neighborhoods and describe each briefly."
+    query = f"User is looking for neighborhoods in {city} with these preferences: {preferences}. Suggest suitable neighborhoods and describe each briefly, including the full location as Neighborhood, City, State."
     messages.append({"role": "user", "content": query})
     response = call_openai_api(messages)
     ChatGPT_reply = response["choices"][0]["message"]["content"]
@@ -52,20 +52,16 @@ if generate_button and city and preferences:
         st.markdown("<h2 style='text-align: center; color: black;'>Recommended Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
         st.write(reply)
         
-        # Extract and clean neighborhood names
+        # Extract neighborhood, city, and state information
         neighborhoods = []
         for line in reply.splitlines():
             if ":" in line:
-                neighborhood = line.split(":")[0].strip()
-                neighborhoods.append(neighborhood)
-        
-        # Format city correctly for Zillow URLs
-        city_formatted = urllib.parse.quote(city.strip().title())
+                location = line.split(":")[0].strip()  # Full location "Neighborhood, City, State"
+                neighborhoods.append(location)
         
         # Display Zillow links
         st.markdown("### Zillow Search Links")
-        for neighborhood in neighborhoods:
-            neighborhood_query = urllib.parse.quote(f"{neighborhood}, {city_formatted}")
-            zillow_url = f"https://www.zillow.com/homes/{neighborhood_query}_rb/"
-            st.markdown(f"- [Search for homes in {neighborhood}, {city} on Zillow]({zillow_url})")
-
+        for location in neighborhoods:
+            location_query = urllib.parse.quote(location)
+            zillow_url = f"https://www.zillow.com/homes/{location_query}_rb/"
+            st.markdown(f"- [Search for homes in {location} on Zillow]({zillow_url})")
