@@ -25,6 +25,10 @@ def call_openai_api(messages):
     )
 
 def parse_neighborhoods(response_text):
+    """
+    Parse the response text to extract neighborhood information.
+    Returns a list of dictionaries containing neighborhood info.
+    """
     neighborhoods = []
     lines = response_text.strip().split('\n')
     for line in lines:
@@ -45,13 +49,16 @@ def parse_neighborhoods(response_text):
     return neighborhoods
 
 def format_zillow_search(neighborhood_info):
-    # Format city, state, and neighborhood for Zillow's URL structure
+    """
+    Format the location string for Zillow search using 'neighborhood-in-city-state' format.
+    """
+    # Prepare each component by converting to lowercase and replacing spaces with hyphens
     neighborhood = '-'.join(neighborhood_info['neighborhood'].lower().split())
     city = '-'.join(neighborhood_info['city'].lower().split())
-    state = neighborhood_info['state'].lower()[:2]  # Abbreviation for state
+    state = neighborhood_info['state'].lower()[:2]  # Use state abbreviation
     
-    # Construct the full Zillow URL
-    search_path = f"{city}-{state}/{neighborhood}"
+    # Format the search path as 'neighborhood-in-city-state'
+    search_path = f"{neighborhood}-in-{city}-{state}"
     return f"https://www.zillow.com/homes/{search_path}_rb/"
 
 def CustomChatGPT(city, preferences, messages):
