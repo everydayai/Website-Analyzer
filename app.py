@@ -21,43 +21,59 @@ def call_openai_api(messages):
     return openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messages,
-        max_tokens=300  # Limit tokens to keep responses concise
+        max_tokens=300
     )
 
 def parse_neighborhoods(response_text):
     """
-    Parse the response text to extract neighborhood information more reliably.
-    Returns a list of tuples containing (neighborhood name, full location string)
+    Parse the response text to extract neighborhood information.
+    Returns a list of dictionaries containing neighborhood info.
     """
     neighborhoods = []
-    current_location = ""
-    
-    # Split the response into lines and process each line
     lines = response_text.strip().split('\n')
+    current_entry = None
+    
     for line in lines:
         line = line.strip()
-        # Look for lines that start with a number and contain location info
         if line and (line.startswith('1.') or line.startswith('2.') or line.startswith('3.')):
             if ':' in line:
-                # Remove the number and leading space
-                location = line.split('.', 1)[1].strip()
-                # Split at the colon to get just the location part
-                location = location.split(':', 1)[0].strip()
-                if ',' in location:
-                    neighborhoods.append(location)
+                location_parts = line.split(':', 1)[0].split(',')
+                if len(location_parts) >= 3:
+                    neighborhood = location_parts[0].split('.', 1)[1].strip()
+                    city = location_parts[1].strip()
+                    state = location_parts[2].strip()
+                    neighborhoods.append({
+                        'neighborhood': neighborhood,
+                        'city': city,
+                        'state': state,
+                        'full': f"{neighborhood}, {city}, {state}"
+                    })
     
     return neighborhoods
 
-def format_zillow_search(location):
+def format_zillow_search(neighborhood_info):
     """
-    Format the location string for Zillow search, handling special characters and spaces.
+    Format the location string for Zillow search using the neighborhood name.
+    Zillow's neighborhood search format is typically: {neighborhood}-{city}-{state}
     """
-    # Remove any special characters and extra spaces
-    clean_location = ' '.join(location.split())
-    # Encode the location for URL
-    encoded_location = urllib.parse.quote(clean_location)
-    # Create the Zillow search URL
-    return f"https://www.zillow.com/homes/{encoded_location}_rb/"
+    # Remove any special characters except spaces and hyphens
+    clean_neighborhood = neighborhood_info['neighborhood'].replace('&', 'and')
+    clean_city = neighborhood_info['city']
+    clean_state = neighborhood_info['state']
+    
+    # Format the search string
+    search_terms = [
+        clean_neighborhood.strip(),
+        clean_city.strip(),
+        clean_state.strip()
+    ]
+    
+    # Join terms with hyphens and convert spaces to hyphens
+    search_string = '-'.join(search_terms).replace(' ', '-').lower()
+    
+    # Encode the string for URL
+    encoded_search = urllib.parse.quote(search_string)
+    return f"https://www.zillow.com/{encoded_search}/"
 
 def CustomChatGPT(city, preferences, messages):
     query = f"""
@@ -106,10 +122,10 @@ if st.session_state["reply"]:
         # Extract and display Zillow links
         neighborhoods = parse_neighborhoods(st.session_state["reply"])
         
-        if neighborhoods:  # Only show the section if we successfully parsed neighborhoods
+        if neighborhoods:
             st.markdown("### 🏠 Zillow Search Links")
-            for location in neighborhoods:
-                zillow_url = format_zillow_search(location)
-                st.markdown(f"- [Search homes in {location}]({zillow_url})")
+            for hood in neighborhoods:
+                zillow_url = format_zillow_search(hood)
+                st.markdown(f"- [Search homes in {hood['neighborhood']}]({zillow_url})")
         else:
             st.warning("Unable to generate Zillow links. Please try again.")
