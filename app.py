@@ -3,7 +3,7 @@ import openai
 import urllib.parse
 
 # Ensure your OpenAI API key is set in your environment variables
-openai.api_key = 'your_openai_api_key'
+openai.api_key = 'OPENAI_API_KEY'
 
 # Function to get neighborhood suggestions from OpenAI
 def suggest_neighborhoods(user_preferences, city=""):
