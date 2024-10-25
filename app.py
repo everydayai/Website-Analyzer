@@ -30,6 +30,10 @@ def CustomChatGPT(city, preferences, messages):
 # Streamlit setup
 st.set_page_config(layout="wide")
 
+# Initialize session state for storing the API reply
+if "reply" not in st.session_state:
+    st.session_state["reply"] = None
+
 # Centered title
 st.markdown("<h1 style='text-align: center; color: black;'>Ideal Neighborhood Finder</h1>", unsafe_allow_html=True)
 
@@ -45,16 +49,17 @@ with col1:
 # Process results on button click
 if generate_button and city and preferences:
     messages = initial_messages.copy()
-    reply, _ = CustomChatGPT(city, preferences, messages)
-    
-    # Display the results
+    st.session_state["reply"], _ = CustomChatGPT(city, preferences, messages)  # Store response in session state
+
+# Display results if there is a reply in session state
+if st.session_state["reply"]:
     with col2:
         st.markdown("<h2 style='text-align: center; color: black;'>Recommended Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
-        st.write(reply)
+        st.write(st.session_state["reply"])
         
         # Extract neighborhood, city, and state information
         neighborhoods = []
-        for line in reply.splitlines():
+        for line in st.session_state["reply"].splitlines():
             if ":" in line:
                 location = line.split(":")[0].strip()  # Full location "Neighborhood, City, State"
                 # Remove any leading numbering
@@ -62,16 +67,11 @@ if generate_button and city and preferences:
                     location = location.split(" ", 1)[1].strip()
                 neighborhoods.append(location)
         
-        # Display Zillow links, focusing on city and state first, then adding neighborhood if needed
+        # Display Zillow links, ensuring neighborhood and city are included in each URL
         st.markdown("### Zillow Search Links")
         for location in neighborhoods:
-            # Simplify the search query to prevent Zillow from returning specific listings
-            city_state_query = urllib.parse.quote(f"{city}, {location.split(',')[-1].strip()}")
-            zillow_url = f"https://www.zillow.com/homes/{city_state_query}_rb/"
-            
-            # Add neighborhood to query if broader city/state search isn't suitable
-            if city.lower() not in location.lower():
-                location_query = urllib.parse.quote(location)
-                zillow_url = f"https://www.zillow.com/homes/{location_query}_rb/"
+            # Ensure format "Neighborhood, City, State" for the search query
+            full_location_query = urllib.parse.quote(location)
+            zillow_url = f"https://www.zillow.com/homes/{full_location_query}_rb/"
             
             st.markdown(f"- [Search for homes in {location} on Zillow]({zillow_url})")
