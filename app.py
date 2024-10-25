@@ -61,9 +61,9 @@ if st.session_state["reply"]:
         # Extract neighborhood, city, and state information accurately
         neighborhoods = []
         for line in st.session_state["reply"].splitlines():
-            # Match format "Neighborhood, City, State"
-            if line and "," in line and "-" in line:  # Ensure line has neighborhood structure
-                location = line.split("-")[0].strip()  # Get "Neighborhood, City, State"
+            # Only capture lines that start with a neighborhood and contain a comma
+            if line and "," in line:
+                location = line.split("-")[0].strip()  # Capture everything before the description
                 neighborhoods.append(location)
         
         # Debugging step: Check if neighborhoods list is populated
