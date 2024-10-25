@@ -52,11 +52,8 @@ if generate_button and city and preferences:
         st.markdown("<h2 style='text-align: center; color: black;'>Recommended Neighborhoods ⬇️</h2>", unsafe_allow_html=True)
         st.write(reply)
         
-        # Extract and display neighborhood names with Zillow links
-        neighborhoods = [line.split(":")[0].strip() for line in reply.splitlines() if line]  # Extract name before ":"
-        
-        st.markdown("### Zillow Search Links")
-        for neighborhood in neighborhoods:
-            neighborhood_city_query = urllib.parse.quote(f"{neighborhood}, {city}")
-            zillow_url = f"https://www.zillow.com/homes/{neighborhood_city_query}_rb/"
-            st.markdown(f"- [Search for homes in {neighborhood}, {city} on Zillow]({zillow_url})")
+        # Extract and clean neighborhood names
+        neighborhoods = []
+        for line in reply.splitlines():
+            if ":" in line:
+                neighborhood = line.split("
