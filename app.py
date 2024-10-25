@@ -57,6 +57,6 @@ if generate_button and city and preferences:
         
         st.markdown("### Zillow Search Links")
         for neighborhood in neighborhoods:
-            neighborhood_query = urllib.parse.quote(neighborhood)
-            zillow_url = f"https://www.zillow.com/homes/{neighborhood_query}_rb/"
-            st.markdown(f"- [Search for homes in {neighborhood} on Zillow]({zillow_url})")
+            neighborhood_city_query = urllib.parse.quote(f"{neighborhood}, {city}")
+            zillow_url = f"https://www.zillow.com/homes/{neighborhood_city_query}_rb/"
+            st.markdown(f"- [Search for homes in {neighborhood}, {city} on Zillow]({zillow_url})")
