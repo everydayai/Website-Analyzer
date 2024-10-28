@@ -65,7 +65,7 @@ def parse_neighborhoods(response_text):
 
 def format_zillow_search(neighborhood_info):
     """
-    Format the location string for Zillow search using 'neighborhood-in-city-state' format.
+    Format the location string for Zillow search using 'neighborhood-city-state' format.
     """
     # Prepare each component by converting to lowercase and replacing spaces with hyphens
     neighborhood = '-'.join(neighborhood_info['neighborhood'].lower().split())
@@ -75,9 +75,9 @@ def format_zillow_search(neighborhood_info):
     state = neighborhood_info['state'].lower()
     state_abbr = STATE_ABBREVIATIONS.get(state, state[:2])  # Use abbreviation or the first two letters if already abbreviated
     
-    # Format the search path as 'neighborhood-in-city-state'
-    search_path = f"{neighborhood}-in-{city}-{state_abbr}"
-    return f"https://www.zillow.com/homes/{search_path}_rb/"
+    # Format the search path as 'neighborhood-city-state'
+    search_path = f"{neighborhood}-{city}-{state_abbr}"
+    return f"https://www.zillow.com/{search_path}/"
 
 def CustomChatGPT(city, preferences, messages):
     query = f"""
