@@ -66,6 +66,7 @@ def parse_neighborhoods(response_text):
 def format_zillow_search(neighborhood_info):
     """
     Format the location string for Zillow search using 'neighborhood, city, state' format with commas and `_rb` at the end.
+    Fallback to a city-level search if the neighborhood is not recognized.
     """
     # Prepare each component with correct capitalization and format for Zillow
     neighborhood = urllib.parse.quote(neighborhood_info['neighborhood'])
@@ -75,9 +76,16 @@ def format_zillow_search(neighborhood_info):
     state = neighborhood_info['state'].lower()
     state_abbr = STATE_ABBREVIATIONS.get(state, state[:2]).upper()  # Ensure state is uppercase
     
-    # Format the search path as 'neighborhood, city, state_rb'
+    # Primary search path with neighborhood
     search_path = f"{neighborhood},-{city},-{state_abbr}_rb"
-    return f"https://www.zillow.com/homes/{search_path}/"
+    url = f"https://www.zillow.com/homes/{search_path}/"
+    
+    # Check URL - fallback to city-level URL if Zillow cannot interpret it
+    if not neighborhood:  # If neighborhood is empty or unrecognized, return a city-level search URL
+        search_path = f"{city},-{state_abbr}_rb"
+        url = f"https://www.zillow.com/homes/{search_path}/"
+    
+    return url
 
 def CustomChatGPT(city, preferences, messages):
     query = f"""
