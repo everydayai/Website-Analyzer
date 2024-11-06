@@ -1,6 +1,6 @@
 import streamlit as st
 import openai
-import os
+import os 
 import urllib.parse
 
 # Ensure your OpenAI API key is set in your environment variables
