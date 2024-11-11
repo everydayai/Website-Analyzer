@@ -19,7 +19,7 @@ def call_openai_api(messages):
     return openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messages,
-        max_tokens=150
+        max_tokens=500
     )
 
 def CustomChatGPT(home_size, stories, paint_type, messages):
