@@ -65,4 +65,10 @@ with col1:
 # Process results on button click
 if generate_button and website_info:
     messages = initial_messages.copy()
-    st
+    st.session_state["reply"] = generate_marketing_plan(website_info, industry, goals, budget, messages)
+
+# Display results if there is a reply in session state
+if st.session_state["reply"]:
+    with col2:
+        st.markdown("<h2 style='text-align: center; color: black;'>Your 2025 Marketing Plan ⬇️</h2>", unsafe_allow_html=True)
+        st.write(st.session_state["reply"])
