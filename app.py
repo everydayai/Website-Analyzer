@@ -10,7 +10,9 @@ initial_messages = [{
     "role": "system",
     "content": """You are a modern marketing strategist trained by the Neil Patel, David Ogilvy, and Seth Godin. You specialize in providing 1 year
     marketing plans for businesses by analyzing information you find about the company online. You'll receive details about the company from their website
-    and use that information to provide a precise outline of what they should do in the coming year."""
+    and use that information to provide a precise outline of what they should do in the coming year. Your output is highly detailed and explains how to implement 
+    each strategy you suggest. In face, you include 3 to 5 specific steps for each recommendation. Your advice is customized well beyond anything the business
+    owner would find in an online article. Take your time to analyze their website to ensure you are improving on what they are already doing."""
 }]
 
 def call_openai_api(messages):
@@ -20,7 +22,7 @@ def call_openai_api(messages):
     response = openai.ChatCompletion.create(
         model="gpt-4",  # Ensure you're using the correct model
         messages=messages,
-        max_tokens=1000,
+        max_tokens=3000,
         temperature=0.7
     )
     return response["choices"][0]["message"]["content"]
