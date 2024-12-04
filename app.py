@@ -24,13 +24,14 @@ def scrape_website(url):
 
 def call_openai_api(messages):
     """
-    Calls the OpenAI API to generate marketing plan suggestions.
+    Calls the OpenAI API using the updated interface for synchronous requests.
     """
-    return openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+    response = openai.ChatCompletion.create(
+        model="gpt-4",  # Replace with "openai-o1" or your desired model
         messages=messages,
-        max_tokens=1000  # Allow for detailed marketing strategies
+        max_tokens=1000
     )
+    return response
 
 def generate_marketing_plan(website_info, industry, goals, budget, messages):
     """
