@@ -22,35 +22,38 @@ def scrape_website(url):
     except Exception as e:
         return f"Error fetching website data: {e}"
 
-def call_openai_api(prompt):
+def call_openai_api(messages):
     """
     Calls the OpenAI API using the updated interface for synchronous requests.
     """
-    response = openai.Completion.create(
-        model="text-davinci-003",  # Replace with your desired model
-        prompt=prompt,
+    response = openai.Chat.create(
+        model="gpt-4",  # Replace with your desired model
+        messages=messages,
         max_tokens=1000,
         temperature=0.7
     )
-    return response.choices[0].text.strip()
+    return response.choices[0].message.content.strip()
 
 def generate_marketing_plan(website_info, industry, goals, budget):
     """
     Generates a marketing plan based on website information, industry, and user goals.
     """
-    prompt = f"""
-    The user has provided the following details:
-    - Website information: {website_info}
-    - Industry: {industry}
-    - Goals for 2025: {goals}
-    - Marketing budget for 2025: ${budget}
+    messages = [
+        {"role": "system", "content": "You are a marketing strategist."},
+        {"role": "user", "content": f"""
+        The user has provided the following details:
+        - Website information: {website_info}
+        - Industry: {industry}
+        - Goals for 2025: {goals}
+        - Marketing budget for 2025: ${budget}
+        
+        Please create a comprehensive marketing plan for 2025. Include specific strategies 
+        (e.g., content marketing, social media, advertising, SEO) and a timeline for implementing them.
+        Highlight how the website's strengths can be leveraged to achieve the stated goals.
+        """}
+    ]
     
-    Please create a comprehensive marketing plan for 2025. Include specific strategies 
-    (e.g., content marketing, social media, advertising, SEO) and a timeline for implementing them.
-    Highlight how the website's strengths can be leveraged to achieve the stated goals.
-    """
-    
-    return call_openai_api(prompt)
+    return call_openai_api(messages)
 
 # Streamlit setup
 st.set_page_config(layout="wide")
