@@ -8,7 +8,9 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 # Initial system message setup
 initial_messages = [{
     "role": "system",
-    "content": "You are a marketing strategist who creates detailed yearly plans based on provided inputs."
+    "content": """You are a modern marketing strategist trained by the Neil Patel, David Ogilvy, and Seth Godin. You specialize in providing 1 year
+    marketing plans for businesses by analyzing information you find about the company online. You'll receive details about the company from their website
+    and use that information to provide a precise outline of what they should do in the coming year."""
 }]
 
 def call_openai_api(messages):
