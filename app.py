@@ -23,26 +23,29 @@ def scrape_website(url):
         return f"Error fetching website data: {e}"
 
 def call_openai_api(messages):
+    """
+    Calls the OpenAI API to generate marketing plan suggestions.
+    """
     return openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messages,
-        max_tokens=500
+        max_tokens=1000  # Allow for detailed marketing strategies
     )
 
-def CustomChatGPT(home_size, stories, paint_type, paint_cost, labor_cost, business_info, messages):
+def generate_marketing_plan(website_info, industry, goals, budget, messages):
+    """
+    Generates a marketing plan based on website information, industry, and user goals.
+    """
     query = f"""
     The user has provided the following details:
-    - Square footage: {home_size} sqft
-    - Number of stories: {stories}
-    - Painting type requested: {paint_type}
-    - Paint cost per gallon: ${paint_cost}
-    - Labor cost per hour: ${labor_cost}
+    - Website information: {website_info}
+    - Industry: {industry}
+    - Goals for 2025: {goals}
+    - Marketing budget for 2025: ${budget}
     
-    Additional business information: {business_info}
-    
-    Provide a detailed cost estimate to paint the home, factoring in the user-specified paint 
-    and labor costs. Include a breakdown for labor, materials, and other expenses. Provide insights 
-    on any factors that might affect the cost.
+    Please create a comprehensive marketing plan for 2025. Include specific strategies 
+    (e.g., content marketing, social media, advertising, SEO) and a timeline for implementing them.
+    Highlight how the website's strengths can be leveraged to achieve the stated goals.
     """
     
     messages.append({"role": "user", "content": query})
@@ -59,36 +62,36 @@ if "reply" not in st.session_state:
     st.session_state["reply"] = None
 
 # Centered title
-st.markdown("<h1 style='text-align: center; color: black;'>Home Painting Cost Estimator with Business Info</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: black;'>2025 Marketing Planner</h1>", unsafe_allow_html=True)
 
 # User inputs
 col1, col2 = st.columns(2)
 with col1:
-    st.markdown("<h2 style='text-align: center; color: black;'>Enter Home and Cost Details</h2>", unsafe_allow_html=True)
-    home_size = st.number_input("Square Footage of Home", min_value=100, max_value=10000, step=50)
-    stories = st.selectbox("Number of Stories", options=["1", "2", "3"])
-    paint_type = st.selectbox("Type of Painting", options=["Interior", "Exterior", "Both"])
-    paint_cost = st.number_input("Cost of Paint per Gallon ($)", min_value=1.0, step=0.5)
-    labor_cost = st.number_input("Labor Cost per Hour ($)", min_value=1.0, step=0.5)
-    website_url = st.text_input("Enter your business website (optional)", placeholder="https://example.com")
-    generate_button = st.button('Estimate Painting Cost')
+    st.markdown("<h2 style='text-align: center; color: black;'>Enter Business Details</h2>", unsafe_allow_html=True)
+    website_url = st.text_input("Enter your business website", placeholder="https://example.com")
+    industry = st.text_input("Industry", placeholder="E.g., Real Estate, Retail, Technology")
+    goals = st.text_area("Goals for 2025", placeholder="E.g., increase brand awareness, drive online sales, expand audience")
+    budget = st.number_input("Marketing Budget for 2025 ($)", min_value=1000, step=1000)
+    generate_button = st.button('Generate Marketing Plan')
 
 # Process results on button click
-if generate_button:
-    business_info = scrape_website(website_url) if website_url else "No additional business information provided."
-    messages = [{
-        "role": "system",
-        "content": """
-        You are a detailed home painting cost estimator. Based on provided home details 
-        and optional business information, generate a comprehensive cost estimate. 
-        Include a breakdown for labor, materials, and other expenses, factoring in any 
-        user-provided costs. Offer insights on factors that might affect pricing.
-        """
-    }]
-    st.session_state["reply"], _ = CustomChatGPT(home_size, stories, paint_type, paint_cost, labor_cost, business_info, messages)
+if generate_button and website_url:
+    website_info = scrape_website(website_url)
+    if "Error" not in website_info:
+        messages = [{
+            "role": "system",
+            "content": """
+            You are a marketing strategist specializing in creating detailed yearly plans. Based on provided website information,
+            industry, goals, and budget, create a tailored 2025 marketing plan. Include strategies, a timeline, and how the 
+            business's website strengths can be used to achieve success.
+            """
+        }]
+        st.session_state["reply"], _ = generate_marketing_plan(website_info, industry, goals, budget, messages)
+    else:
+        st.session_state["reply"] = website_info
 
 # Display results if there is a reply in session state
 if st.session_state["reply"]:
     with col2:
-        st.markdown("<h2 style='text-align: center; color: black;'>Estimated Painting Cost ⬇️</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center; color: black;'>Your 2025 Marketing Plan ⬇️</h2>", unsafe_allow_html=True)
         st.write(st.session_state["reply"])
