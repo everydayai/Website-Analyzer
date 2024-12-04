@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import os
 
 # Ensure your OpenAI API key is set in your environment variables
-openai.api_key = os.environ["OPENAI_API_KEY"]
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def scrape_website(url):
     """
@@ -16,44 +16,45 @@ def scrape_website(url):
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "html.parser")
         
-        # Extract meta description or a paragraph as a summary
-        description = soup.find("meta", {"name": "description"}) or soup.find("p")
-        return description.get("content") if description else "No description found."
+        # Extract meta description or the first paragraph as a summary
+        description = soup.find("meta", {"name": "description"})
+        if description and description.get("content"):
+            return description["content"]
+        else:
+            paragraph = soup.find("p")
+            return paragraph.get_text(strip=True) if paragraph else "No description found."
     except Exception as e:
         return f"Error fetching website data: {e}"
 
-def call_openai_api(messages):
+def call_openai_api(prompt):
     """
     Calls the OpenAI API using the updated interface for synchronous requests.
     """
-    response = openai.Chat.create(
-        model="gpt-4",  # Replace with your desired model
-        messages=messages,
+    response = openai.Completion.create(
+        model="text-davinci-003",  # Replace with your desired model
+        prompt=prompt,
         max_tokens=1000,
         temperature=0.7
     )
-    return response.choices[0].message.content.strip()
+    return response.choices[0].text.strip()
 
 def generate_marketing_plan(website_info, industry, goals, budget):
     """
     Generates a marketing plan based on website information, industry, and user goals.
     """
-    messages = [
-        {"role": "system", "content": "You are a marketing strategist."},
-        {"role": "user", "content": f"""
-        The user has provided the following details:
-        - Website information: {website_info}
-        - Industry: {industry}
-        - Goals for 2025: {goals}
-        - Marketing budget for 2025: ${budget}
-        
-        Please create a comprehensive marketing plan for 2025. Include specific strategies 
-        (e.g., content marketing, social media, advertising, SEO) and a timeline for implementing them.
-        Highlight how the website's strengths can be leveraged to achieve the stated goals.
-        """}
-    ]
+    prompt = f"""
+    The user has provided the following details:
+    - Website information: {website_info}
+    - Industry: {industry}
+    - Goals for 2025: {goals}
+    - Marketing budget for 2025: ${budget}
     
-    return call_openai_api(messages)
+    Please create a comprehensive marketing plan for 2025. Include specific strategies 
+    (e.g., content marketing, social media, advertising, SEO) and a timeline for implementing them.
+    Highlight how the website's strengths can be leveraged to achieve the stated goals.
+    """
+    
+    return call_openai_api(prompt)
 
 # Streamlit setup
 st.set_page_config(layout="wide")
