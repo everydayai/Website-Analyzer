@@ -22,22 +22,23 @@ def scrape_website(url):
     except Exception as e:
         return f"Error fetching website data: {e}"
 
-def call_openai_api(messages):
+def call_openai_api(prompt):
     """
     Calls the OpenAI API using the updated interface for synchronous requests.
     """
-    response = openai.ChatCompletion.create(
-        model="gpt-4",  # Replace with "openai-o1" or your desired model
-        messages=messages,
-        max_tokens=1000
+    response = openai.Completion.create(
+        model="text-davinci-003",  # Replace with your desired model
+        prompt=prompt,
+        max_tokens=1000,
+        temperature=0.7
     )
-    return response
+    return response.choices[0].text.strip()
 
-def generate_marketing_plan(website_info, industry, goals, budget, messages):
+def generate_marketing_plan(website_info, industry, goals, budget):
     """
     Generates a marketing plan based on website information, industry, and user goals.
     """
-    query = f"""
+    prompt = f"""
     The user has provided the following details:
     - Website information: {website_info}
     - Industry: {industry}
@@ -49,11 +50,7 @@ def generate_marketing_plan(website_info, industry, goals, budget, messages):
     Highlight how the website's strengths can be leveraged to achieve the stated goals.
     """
     
-    messages.append({"role": "user", "content": query})
-    response = call_openai_api(messages)
-    ChatGPT_reply = response["choices"][0]["message"]["content"]
-    messages.append({"role": "assistant", "content": ChatGPT_reply})
-    return ChatGPT_reply, messages
+    return call_openai_api(prompt)
 
 # Streamlit setup
 st.set_page_config(layout="wide")
@@ -79,15 +76,7 @@ with col1:
 if generate_button and website_url:
     website_info = scrape_website(website_url)
     if "Error" not in website_info:
-        messages = [{
-            "role": "system",
-            "content": """
-            You are a marketing strategist specializing in creating detailed yearly plans. Based on provided website information,
-            industry, goals, and budget, create a tailored 2025 marketing plan. Include strategies, a timeline, and how the 
-            business's website strengths can be used to achieve success.
-            """
-        }]
-        st.session_state["reply"], _ = generate_marketing_plan(website_info, industry, goals, budget, messages)
+        st.session_state["reply"] = generate_marketing_plan(website_info, industry, goals, budget)
     else:
         st.session_state["reply"] = website_info
 
