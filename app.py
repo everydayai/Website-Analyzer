@@ -13,6 +13,10 @@ def scrape_website(url, max_pages=5):
     Crawls and scrapes content from the given website URL.
     Follows internal links and extracts meaningful information from up to `max_pages` pages.
     """
+    # Ensure URL has the correct format
+    if not url.startswith("http"):
+        url = f"https://{url}"
+
     visited = set()
     to_visit = [url]
     all_content = []
@@ -55,12 +59,15 @@ initial_messages = [{
     "role": "system",
     "content": """You are a world-class marketing strategist trained by Neil Patel, David Ogilvy, and Seth Godin. 
     You specialize in creating precise, highly actionable, and detailed 1-year marketing plans tailored to businesses' specific needs. 
-    For every strategy you suggest, include 3 to 5 detailed, actionable steps that explain how to implement it. 
-    Ensure each plan considers the business's industry, budget, goals, and current strengths as reflected in the provided information.
+    For every strategy you suggest, include:
+    - Lists of specific keywords for blogs, videos, or SEO.
+    - Titles and topics for YouTube videos, blog posts, or other content.
+    - Ad campaign structures, including target audiences and platforms.
+    - Step-by-step implementation details for each suggestion.
+    - Measurable KPIs or success metrics.
 
-    Your advice should feel like it is coming from a personal consultant who deeply understands the business. Go beyond generalities, 
-    and include specific suggestions for platforms, tools, campaigns, or techniques. If applicable, suggest measurable KPIs to track success.
-    If the company is already doing well in some areas, suggest how they can take those efforts to the next level."""
+    Your advice must be execution-ready, requiring minimal further planning by the business owner. 
+    Leverage the website information provided to deeply customize your suggestions, ensuring alignment with the business's goals and strengths."""
 }]
 
 def call_openai_api(messages):
@@ -86,15 +93,16 @@ def generate_marketing_plan(website_content, industry, goals, budget, messages):
     - Goals for 2025: {goals}
     - Marketing budget for 2025: ${budget}
 
-    Based on this information, create a comprehensive, customized 1-year marketing plan for 2025. 
-    Your output should include:
-    1. **Content Marketing**: Suggestions for blogs, videos, or other content types. Provide 3-5 actionable steps for implementation.
-    2. **Social Media Strategy**: Recommend specific platforms, posting frequency, and campaign ideas, with measurable goals or KPIs.
-    3. **Advertising Campaigns**: Outline paid ad strategies (e.g., Google Ads, Facebook Ads). Include budget allocation and expected ROI.
-    4. **Search Engine Optimization (SEO)**: Suggest improvements or new tactics, including tools or techniques they can use.
-    5. **Innovative Approaches**: Any unique or industry-specific ideas that would differentiate this business.
+    Create a comprehensive, customized 1-year marketing plan for 2025. 
+    Include:
+    1. **Keywords**: Provide a list of specific keywords to target for blogs, videos, and SEO.
+    2. **Content Topics**: Suggest blog and YouTube video topics with detailed titles.
+    3. **Social Media**: Recommend platforms, posting frequency, and campaign ideas with measurable goals.
+    4. **Advertising Campaigns**: Outline paid ad strategies, including platforms, target audiences, and budget allocation.
+    5. **SEO Improvements**: Suggest tools, techniques, and steps to improve search rankings.
+    6. **Execution Steps**: Provide actionable, step-by-step instructions for each recommendation.
 
-    For each strategy, explain how it aligns with the business's goals and utilizes its current strengths. Provide a quarterly timeline to help them implement these strategies effectively."""
+    Ensure all suggestions align with the business's goals and strengths, and include a quarterly timeline for implementation."""
     
     messages.append({"role": "user", "content": query})
     return call_openai_api(messages)
@@ -113,7 +121,7 @@ st.markdown("<h1 style='text-align: center; color: black;'>2025 Marketing Planne
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("<h2 style='text-align: center; color: black;'>Enter Business Details</h2>", unsafe_allow_html=True)
-    website_url = st.text_input("Enter your business website", placeholder="https://example.com")
+    website_url = st.text_input("Enter your business website", placeholder="example.com (no need for https://)")
     industry = st.text_input("Industry", placeholder="E.g., Real Estate, Retail, Technology")
     goals = st.text_area("Goals for 2025", placeholder="E.g., increase brand awareness, drive online sales")
     budget = st.number_input("Marketing Budget for 2025 ($)", min_value=1000, step=1000)
