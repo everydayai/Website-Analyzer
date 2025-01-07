@@ -70,9 +70,7 @@ def infer_business_info_from_url(url):
                 "role": "user",
                 "content": f"The domain is {domain_name}. What can you infer about this business?"
             }
-        ],
-        max_tokens=200,
-        temperature=0.7
+        ]
     )
     return inferred_info["choices"][0]["message"]["content"]
 
@@ -110,7 +108,25 @@ def generate_marketing_plan(website_content, industry, goals, budget, location, 
     Ensure all suggestions align with the business's strengths, and avoid generic or obvious recommendations."""
     
     messages.append({"role": "user", "content": query})
-    return call_openai_api(messages)
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=messages
+    )
+    return response["choices"][0]["message"]["content"]
+
+# Define initial_messages
+initial_messages = [{
+    "role": "system",
+    "content": """You are a world-class marketing strategist trained by Neil Patel, David Ogilvy, and Seth Godin. 
+    Your task is to create highly customized marketing plans based on user input. Incorporate any business location 
+    or target areas explicitly mentioned in the website content or user-provided details into the recommendations.
+    Go beyond generic suggestions, and include:
+    - Specific, long-tail keywords to target.
+    - Detailed content ideas, including blogs, videos, and social media campaigns.
+    - Unique strategies tailored to the business's industry, goals, and location.
+    - Innovative advertising campaigns and emerging platform recommendations.
+    Ensure every suggestion is actionable and includes measurable KPIs."""
+}]
 
 # Streamlit setup
 st.set_page_config(layout="wide")
