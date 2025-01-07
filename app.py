@@ -13,7 +13,6 @@ def scrape_website(url, max_pages=5):
     Crawls and scrapes content from the given website URL.
     Follows internal links and extracts meaningful information from up to `max_pages` pages.
     """
-    # Ensure URL has the correct format
     if not url.startswith("http"):
         url = f"https://{url}"
 
@@ -27,22 +26,20 @@ def scrape_website(url, max_pages=5):
             continue
 
         try:
-            response = requests.get(current_url)
+            response = requests.get(current_url, timeout=10)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, "html.parser")
             visited.add(current_url)
 
-            # Extract meaningful content (e.g., meta description, main text)
+            # Extract meaningful content
             meta_description = soup.find("meta", {"name": "description"})
             if meta_description and meta_description.get("content"):
                 all_content.append(meta_description["content"])
 
-            # Extract main text (e.g., headers, paragraphs)
             paragraphs = soup.find_all("p")
             for para in paragraphs:
                 all_content.append(para.get_text(strip=True))
 
-            # Extract internal links
             links = soup.find_all("a", href=True)
             for link in links:
                 full_url = urljoin(current_url, link["href"])
@@ -52,22 +49,14 @@ def scrape_website(url, max_pages=5):
         except Exception as e:
             st.warning(f"Error fetching {current_url}: {e}")
 
-    return " ".join(all_content[:3000])  # Limit content length for OpenAI API
+    return " ".join(all_content[:3000])
 
 # Initial system message setup
 initial_messages = [{
     "role": "system",
     "content": """You are a world-class marketing strategist trained by Neil Patel, David Ogilvy, and Seth Godin. 
     You specialize in creating precise, highly actionable, and detailed 1-year marketing plans tailored to businesses' specific needs. 
-    For every strategy you suggest, include:
-    - Lists of specific keywords for blogs, videos, or SEO.
-    - Titles and topics for YouTube videos, blog posts, or other content.
-    - Ad campaign structures, including target audiences and platforms.
-    - Step-by-step implementation details for each suggestion.
-    - Measurable KPIs or success metrics.
-
-    Your advice must be execution-ready, requiring minimal further planning by the business owner. 
-    Leverage the website information provided to deeply customize your suggestions, ensuring alignment with the business's goals and strengths."""
+    Ensure all advice aligns with the user's goals and strengths."""
 }]
 
 def call_openai_api(messages):
@@ -82,27 +71,27 @@ def call_openai_api(messages):
     )
     return response["choices"][0]["message"]["content"]
 
-def generate_marketing_plan(website_content, industry, goals, budget, messages):
+def generate_marketing_plan(website_content, industry, goals, budget, messages, fallback=False):
     """
     Generates a marketing plan based on website content, industry, and user goals.
     """
     query = f"""
     The user has provided the following details:
-    - Website content: {website_content}
+    - Website content: {website_content if not fallback else "N/A (website content could not be retrieved)"}
     - Industry: {industry}
     - Goals for 2025: {goals}
     - Marketing budget for 2025: ${budget}
-
     Create a comprehensive, customized 1-year marketing plan for 2025. 
     Include:
-    1. **Keywords**: Provide a list of specific keywords to target for blogs, videos, and SEO.
-    2. **Content Topics**: Suggest blog and YouTube video topics with detailed titles.
-    3. **Social Media**: Recommend platforms, posting frequency, and campaign ideas with measurable goals.
-    4. **Advertising Campaigns**: Outline paid ad strategies, including platforms, target audiences, and budget allocation.
-    5. **SEO Improvements**: Suggest tools, techniques, and steps to improve search rankings.
-    6. **Execution Steps**: Provide actionable, step-by-step instructions for each recommendation.
-
-    Ensure all suggestions align with the business's goals and strengths, and include a quarterly timeline for implementation."""
+    1. **Overview**: Summarize the input details, highlighting any missing information.
+    2. **Keywords**: Provide a list of specific keywords to target for blogs, videos, and SEO.
+    3. **Content Topics**: Suggest blog and YouTube video topics with detailed titles.
+    4. **Social Media**: Recommend platforms, posting frequency, and campaign ideas with measurable goals.
+    5. **Advertising Campaigns**: Outline paid ad strategies, including platforms, target audiences, and budget allocation.
+    6. **SEO Improvements**: Suggest tools, techniques, and steps to improve search rankings.
+    7. **Execution Steps**: Provide actionable, step-by-step instructions for each recommendation.
+    Ensure all suggestions align with the business's goals and strengths, and include a quarterly timeline for implementation.
+    If fallback mode is active, note the lack of website content in the overview but still provide high-value recommendations based on the user's input."""
     
     messages.append({"role": "user", "content": query})
     return call_openai_api(messages)
@@ -128,17 +117,20 @@ with col1:
     generate_button = st.button('Generate Marketing Plan')
 
 # Process results on button click
-if generate_button and website_url:
+if generate_button:
     with st.spinner("Analyzing website content..."):
-        website_content = scrape_website(website_url)
-    if website_content:
-        messages = initial_messages.copy()
-        st.session_state["reply"] = generate_marketing_plan(website_content, industry, goals, budget, messages)
-    else:
-        st.warning("Unable to retrieve website content. Please check the URL or try again.")
+        website_content = scrape_website(website_url) if website_url else None
+    fallback_mode = not website_content
+    if fallback_mode:
+        st.warning("Unable to retrieve website content. Generating recommendations based on your input.")
+    messages = initial_messages.copy()
+    st.session_state["reply"] = generate_marketing_plan(
+        website_content if website_content else "N/A", 
+        industry, goals, budget, messages, fallback=fallback_mode
+    )
 
 # Display results if there is a reply in session state
 if st.session_state["reply"]:
     with col2:
         st.markdown("<h2 style='text-align: center; color: black;'>Your 2025 Marketing Plan ⬇️</h2>", unsafe_allow_html=True)
-        st.write(st.session_state["reply"])
+        st.markdown(st.session_state["reply"])
