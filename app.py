@@ -98,14 +98,17 @@ def generate_marketing_plan(website_content, industry, goals, budget, location, 
     - {additional_info}
 
     Create a detailed 1-year marketing plan that includes:
-    1. **Advanced Keywords**: Long-tail keywords specific to the industry and location (if applicable).
-    2. **Content Topics**: Blog and YouTube video topics that target the business's goals and location.
-    3. **Social Media Strategies**: Platform recommendations, post frequency, and campaign ideas tailored to the location.
-    4. **Advertising Campaigns**: Target audience, platforms, and budget breakdowns, integrating location-specific targeting.
-    5. **Emerging Platforms**: Recommendations for new or underutilized platforms.
-    6. **SEO Improvements**: Tools, techniques, and steps to improve search rankings.
-    7. **Execution Plan**: Actionable, step-by-step instructions for implementation with quarterly timelines.
-    Ensure all suggestions align with the business's strengths, and avoid generic or obvious recommendations."""
+    1. **Advanced Keywords**: Provide at least 10 long-tail keywords specific to the industry and location (if applicable).
+    2. **Content Topics**: Provide at least 10 blog, YouTube, or social media topics, each with a brief description.
+    3. **SEO Strategies**: Detailed recommendations for improving search rankings, including tools and methods.
+    4. **Content Marketing Plan**: How to leverage the provided content topics to achieve the stated goals.
+    5. **Social Media Strategies**: Platforms, posting frequency, campaign ideas, and location-specific tactics.
+    6. **Advertising Campaigns**: Platforms, budget allocation, target audience details, and creative strategies.
+    7. **Execution Timeline**: A quarterly breakdown of actionable steps with measurable KPIs.
+
+    Ensure the recommendations are detailed, actionable, and tailored to the business's specific goals, budget, and location.
+    Avoid generic suggestions and provide unique, high-value insights.
+    """
     
     messages.append({"role": "user", "content": query})
     response = openai.ChatCompletion.create(
