@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import os
+import re
 
 # Ensure your OpenAI API key is set in your environment variables
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -49,25 +50,29 @@ def scrape_website(url, max_pages=5):
                     to_visit.append(full_url)
 
         except Exception:
-            # Silently skip any errors during scraping
             continue
 
     return " ".join(all_content[:3000]), scrape_successful
+
+def extract_location(content):
+    """
+    Extract a possible location from the website content using regular expressions.
+    """
+    location_match = re.search(r'\b(?:serving|located in|offices in|based in)\s([\w\s,]+)', content, re.IGNORECASE)
+    return location_match.group(1).strip() if location_match else None
 
 # Initial system message setup
 initial_messages = [{
     "role": "system",
     "content": """You are a world-class marketing strategist trained by Neil Patel, David Ogilvy, and Seth Godin. 
-    Your task is to create highly customized and innovative marketing plans based on the provided details. 
-    Go beyond generic strategies and use advanced analysis to recommend:
-    - Marketing tactics inspired by successful case studies from the same or similar industries.
-    - Unique approaches that leverage emerging trends, tools, and platforms.
-    - Recommendations that align with the business's budget and specific goals.
-    Each strategy must:
-    - Be actionable, with clear steps to execute.
-    - Include measurable KPIs to track success.
-    - Be specific to the business's industry, competitive landscape, and target audience.
-    Ensure every suggestion feels fresh, creative, and deeply tailored to the business's needs."""
+    Your task is to create highly customized marketing plans based on user input. Incorporate any business location 
+    or target areas explicitly mentioned in the website content or user-provided details into the recommendations.
+    Go beyond generic suggestions, and include:
+    - Specific, long-tail keywords to target.
+    - Detailed content ideas, including blogs, videos, and social media campaigns.
+    - Unique strategies tailored to the business's industry, goals, and location.
+    - Innovative advertising campaigns and emerging platform recommendations.
+    Ensure every suggestion is actionable and includes measurable KPIs."""
 }]
 
 def call_openai_api(messages):
@@ -82,21 +87,29 @@ def call_openai_api(messages):
     )
     return response["choices"][0]["message"]["content"]
 
-def generate_marketing_plan(website_content, industry, goals, budget, messages, fallback=False):
+def generate_marketing_plan(website_content, industry, goals, budget, location, messages, fallback=False):
     """
-    Generates a marketing plan based on website content, industry, and user goals.
+    Generates a marketing plan based on website content, industry, goals, and budget.
     """
+    location_info = f"The business is located in {location}." if location else "No specific location was mentioned."
+
     query = f"""
     The user has provided the following details:
     - Website content: {website_content if not fallback else "N/A (website content could not be retrieved)"}
     - Industry: {industry}
     - Goals for 2025: {goals}
     - Marketing budget for 2025: ${budget}
-    Create a comprehensive, customized 1-year marketing plan for 2025, including:
-    - Advanced analysis based on successful case studies and trends.
-    - Unique strategies for the business to stand out.
-    - Actionable steps with measurable KPIs.
-    Avoid generic suggestions; focus on innovative and practical ideas."""
+    - {location_info}
+
+    Create a detailed 1-year marketing plan that includes:
+    1. **Advanced Keywords**: Long-tail keywords specific to the industry and location (if applicable).
+    2. **Content Topics**: Blog and YouTube video topics that target the business's goals and location.
+    3. **Social Media Strategies**: Platform recommendations, post frequency, and campaign ideas tailored to the location.
+    4. **Advertising Campaigns**: Target audience, platforms, and budget breakdowns, integrating location-specific targeting.
+    5. **Emerging Platforms**: Recommendations for new or underutilized platforms.
+    6. **SEO Improvements**: Tools, techniques, and steps to improve search rankings.
+    7. **Execution Plan**: Actionable, step-by-step instructions for implementation with quarterly timelines.
+    Ensure all suggestions align with the business's strengths, and avoid generic or obvious recommendations."""
     
     messages.append({"role": "user", "content": query})
     return call_openai_api(messages)
@@ -128,13 +141,14 @@ if generate_button:
     st.session_state["show_notice"] = True
     with st.spinner("Analyzing website content and preparing your report..."):
         website_content, scrape_successful = scrape_website(website_url) if website_url else ("", False)
+        location = extract_location(website_content) if scrape_successful else None
     fallback_mode = not scrape_successful
     if fallback_mode:
         st.warning("Unable to retrieve website content. Generating recommendations based on your input.")
     messages = initial_messages.copy()
     st.session_state["reply"] = generate_marketing_plan(
         website_content if scrape_successful else "N/A", 
-        industry, goals, budget, messages, fallback=fallback_mode
+        industry, goals, budget, location, messages, fallback=fallback_mode
     )
     st.session_state["show_notice"] = False  # Remove the notice once the report is ready
 
