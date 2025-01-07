@@ -19,6 +19,7 @@ def scrape_website(url, max_pages=5):
     visited = set()
     to_visit = [url]
     all_content = []
+    scrape_successful = False
 
     while to_visit and len(visited) < max_pages:
         current_url = to_visit.pop(0)
@@ -30,6 +31,7 @@ def scrape_website(url, max_pages=5):
             response.raise_for_status()
             soup = BeautifulSoup(response.content, "html.parser")
             visited.add(current_url)
+            scrape_successful = True
 
             # Extract meaningful content
             meta_description = soup.find("meta", {"name": "description"})
@@ -46,10 +48,11 @@ def scrape_website(url, max_pages=5):
                 if url in full_url and full_url not in visited:
                     to_visit.append(full_url)
 
-        except Exception as e:
-            st.warning(f"Error fetching {current_url}: {e}")
+        except Exception:
+            # Silently skip any errors during scraping
+            continue
 
-    return " ".join(all_content[:3000])
+    return " ".join(all_content[:3000]), scrape_successful
 
 # Initial system message setup
 initial_messages = [{
@@ -118,14 +121,15 @@ with col1:
 
 # Process results on button click
 if generate_button:
-    with st.spinner("Analyzing website content..."):
-        website_content = scrape_website(website_url) if website_url else None
-    fallback_mode = not website_content
+    st.info("Generating your marketing plan. This process may take a minute or two. Please wait...")
+    with st.spinner("Analyzing website content and preparing your report..."):
+        website_content, scrape_successful = scrape_website(website_url) if website_url else ("", False)
+    fallback_mode = not scrape_successful
     if fallback_mode:
         st.warning("Unable to retrieve website content. Generating recommendations based on your input.")
     messages = initial_messages.copy()
     st.session_state["reply"] = generate_marketing_plan(
-        website_content if website_content else "N/A", 
+        website_content if scrape_successful else "N/A", 
         industry, goals, budget, messages, fallback=fallback_mode
     )
 
