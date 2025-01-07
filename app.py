@@ -58,8 +58,16 @@ def scrape_website(url, max_pages=5):
 initial_messages = [{
     "role": "system",
     "content": """You are a world-class marketing strategist trained by Neil Patel, David Ogilvy, and Seth Godin. 
-    You specialize in creating precise, highly actionable, and detailed 1-year marketing plans tailored to businesses' specific needs. 
-    Ensure all advice aligns with the user's goals and strengths."""
+    Your task is to create highly customized and innovative marketing plans based on the provided details. 
+    Go beyond generic strategies and use advanced analysis to recommend:
+    - Marketing tactics inspired by successful case studies from the same or similar industries.
+    - Unique approaches that leverage emerging trends, tools, and platforms.
+    - Recommendations that align with the business's budget and specific goals.
+    Each strategy must:
+    - Be actionable, with clear steps to execute.
+    - Include measurable KPIs to track success.
+    - Be specific to the business's industry, competitive landscape, and target audience.
+    Ensure every suggestion feels fresh, creative, and deeply tailored to the business's needs."""
 }]
 
 def call_openai_api(messages):
@@ -84,17 +92,11 @@ def generate_marketing_plan(website_content, industry, goals, budget, messages, 
     - Industry: {industry}
     - Goals for 2025: {goals}
     - Marketing budget for 2025: ${budget}
-    Create a comprehensive, customized 1-year marketing plan for 2025. 
-    Include:
-    1. **Overview**: Summarize the input details, highlighting any missing information.
-    2. **Keywords**: Provide a list of specific keywords to target for blogs, videos, and SEO.
-    3. **Content Topics**: Suggest blog and YouTube video topics with detailed titles.
-    4. **Social Media**: Recommend platforms, posting frequency, and campaign ideas with measurable goals.
-    5. **Advertising Campaigns**: Outline paid ad strategies, including platforms, target audiences, and budget allocation.
-    6. **SEO Improvements**: Suggest tools, techniques, and steps to improve search rankings.
-    7. **Execution Steps**: Provide actionable, step-by-step instructions for each recommendation.
-    Ensure all suggestions align with the business's goals and strengths, and include a quarterly timeline for implementation.
-    If fallback mode is active, note the lack of website content in the overview but still provide high-value recommendations based on the user's input."""
+    Create a comprehensive, customized 1-year marketing plan for 2025, including:
+    - Advanced analysis based on successful case studies and trends.
+    - Unique strategies for the business to stand out.
+    - Actionable steps with measurable KPIs.
+    Avoid generic suggestions; focus on innovative and practical ideas."""
     
     messages.append({"role": "user", "content": query})
     return call_openai_api(messages)
@@ -105,6 +107,8 @@ st.set_page_config(layout="wide")
 # Initialize session state
 if "reply" not in st.session_state:
     st.session_state["reply"] = None
+if "show_notice" not in st.session_state:
+    st.session_state["show_notice"] = False
 
 # Centered title
 st.markdown("<h1 style='text-align: center; color: black;'>2025 Marketing Planner</h1>", unsafe_allow_html=True)
@@ -113,7 +117,7 @@ st.markdown("<h1 style='text-align: center; color: black;'>2025 Marketing Planne
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("<h2 style='text-align: center; color: black;'>Enter Business Details</h2>", unsafe_allow_html=True)
-    website_url = st.text_input("Enter your business website", placeholder="example.com (no need for https://)")
+    website_url = st.text_input("Enter your business website", placeholder="e.g., https://example.com")
     industry = st.text_input("Industry", placeholder="E.g., Real Estate, Retail, Technology")
     goals = st.text_area("Goals for 2025", placeholder="E.g., increase brand awareness, drive online sales")
     budget = st.number_input("Marketing Budget for 2025 ($)", min_value=1000, step=1000)
@@ -121,7 +125,7 @@ with col1:
 
 # Process results on button click
 if generate_button:
-    st.info("Generating your marketing plan. This process may take a minute or two. Please wait...")
+    st.session_state["show_notice"] = True
     with st.spinner("Analyzing website content and preparing your report..."):
         website_content, scrape_successful = scrape_website(website_url) if website_url else ("", False)
     fallback_mode = not scrape_successful
@@ -132,6 +136,11 @@ if generate_button:
         website_content if scrape_successful else "N/A", 
         industry, goals, budget, messages, fallback=fallback_mode
     )
+    st.session_state["show_notice"] = False  # Remove the notice once the report is ready
+
+# Display the waiting notice
+if st.session_state["show_notice"]:
+    st.info("Generating your marketing plan. This process may take a minute or two. Please wait...")
 
 # Display results if there is a reply in session state
 if st.session_state["reply"]:
