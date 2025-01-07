@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 import os
 import re
 
@@ -54,6 +54,28 @@ def scrape_website(url, max_pages=5):
 
     return " ".join(all_content[:3000]), scrape_successful
 
+def infer_business_info_from_url(url):
+    """
+    Infer business details from the domain name.
+    """
+    domain_name = urlparse(url).netloc
+    inferred_info = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a business analyst. Based on domain names, generate likely information about a business, including its industry, target audience, and goals."
+            },
+            {
+                "role": "user",
+                "content": f"The domain is {domain_name}. What can you infer about this business?"
+            }
+        ],
+        max_tokens=200,
+        temperature=0.7
+    )
+    return inferred_info["choices"][0]["message"]["content"]
+
 def extract_location(content):
     """
     Extract a possible location from the website content using regular expressions.
@@ -61,37 +83,12 @@ def extract_location(content):
     location_match = re.search(r'\b(?:serving|located in|offices in|based in)\s([\w\s,]+)', content, re.IGNORECASE)
     return location_match.group(1).strip() if location_match else None
 
-# Initial system message setup
-initial_messages = [{
-    "role": "system",
-    "content": """You are a world-class marketing strategist trained by Neil Patel, David Ogilvy, and Seth Godin. 
-    Your task is to create highly customized marketing plans based on user input. Incorporate any business location 
-    or target areas explicitly mentioned in the website content or user-provided details into the recommendations.
-    Go beyond generic suggestions, and include:
-    - Specific, long-tail keywords to target.
-    - Detailed content ideas, including blogs, videos, and social media campaigns.
-    - Unique strategies tailored to the business's industry, goals, and location.
-    - Innovative advertising campaigns and emerging platform recommendations.
-    Ensure every suggestion is actionable and includes measurable KPIs."""
-}]
-
-def call_openai_api(messages):
-    """
-    Calls the OpenAI ChatCompletion API with the correct format.
-    """
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=messages,
-        max_tokens=3000,
-        temperature=0.7
-    )
-    return response["choices"][0]["message"]["content"]
-
-def generate_marketing_plan(website_content, industry, goals, budget, location, messages, fallback=False):
+def generate_marketing_plan(website_content, industry, goals, budget, location, inferred_info, messages, fallback=False):
     """
     Generates a marketing plan based on website content, industry, goals, and budget.
     """
     location_info = f"The business is located in {location}." if location else "No specific location was mentioned."
+    additional_info = f"Inferred details: {inferred_info}" if inferred_info else "No additional business details were inferred."
 
     query = f"""
     The user has provided the following details:
@@ -100,6 +97,7 @@ def generate_marketing_plan(website_content, industry, goals, budget, location, 
     - Goals for 2025: {goals}
     - Marketing budget for 2025: ${budget}
     - {location_info}
+    - {additional_info}
 
     Create a detailed 1-year marketing plan that includes:
     1. **Advanced Keywords**: Long-tail keywords specific to the industry and location (if applicable).
@@ -131,8 +129,8 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("<h2 style='text-align: center; color: black;'>Enter Business Details</h2>", unsafe_allow_html=True)
     website_url = st.text_input("Enter your business website", placeholder="e.g., https://example.com")
-    industry = st.text_input("Industry", placeholder="E.g., Real Estate, Retail, Technology")
-    goals = st.text_area("Goals for 2025", placeholder="E.g., increase brand awareness, drive online sales")
+    industry = st.text_input("Industry (optional)", placeholder="E.g., Real Estate, Retail, Technology")
+    goals = st.text_area("Goals for 2025 (optional)", placeholder="E.g., increase brand awareness, drive online sales")
     budget = st.number_input("Marketing Budget for 2025 ($)", min_value=1000, step=1000)
     generate_button = st.button('Generate Marketing Plan')
 
@@ -142,13 +140,14 @@ if generate_button:
     with st.spinner("Analyzing website content and preparing your report..."):
         website_content, scrape_successful = scrape_website(website_url) if website_url else ("", False)
         location = extract_location(website_content) if scrape_successful else None
+        inferred_info = infer_business_info_from_url(website_url) if not scrape_successful else None
     fallback_mode = not scrape_successful
     if fallback_mode:
-        st.warning("Unable to retrieve website content. Generating recommendations based on your input.")
+        st.warning("Unable to retrieve website content. Generating recommendations based on inferred details.")
     messages = initial_messages.copy()
     st.session_state["reply"] = generate_marketing_plan(
         website_content if scrape_successful else "N/A", 
-        industry, goals, budget, location, messages, fallback=fallback_mode
+        industry, goals, budget, location, inferred_info, messages, fallback=fallback_mode
     )
     st.session_state["show_notice"] = False  # Remove the notice once the report is ready
 
