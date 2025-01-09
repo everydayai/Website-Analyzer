@@ -54,6 +54,13 @@ def scrape_website(url, max_pages=5):
 
     return " ".join(all_content[:3000]), scrape_successful
 
+def extract_location(content):
+    """
+    Extract a possible location from the website content using regular expressions.
+    """
+    location_match = re.search(r'\b(?:serving|located in|offices in|based in)\s([\w\s,]+)', content, re.IGNORECASE)
+    return location_match.group(1).strip() if location_match else None
+
 def infer_business_info_from_url(url):
     """
     Infer business details from the domain name.
