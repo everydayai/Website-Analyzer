@@ -74,30 +74,34 @@ def infer_business_info_from_url(url):
     )
     return inferred_info["choices"][0]["message"]["content"]
 
-def generate_marketing_plan(content, industry, goals, budget, location, inferred_info, messages, fallback=False):
+def generate_marketing_plan(content, goals, budget, location_focus, campaign_focus, location, inferred_info, messages, fallback=False):
     """
-    Generates a marketing plan based on provided content, industry, goals, and budget.
+    Generates a marketing plan based on provided content, goals, budget, and optional focuses.
     """
     location_info = f"The business is located in {location}." if location else "No specific location was mentioned."
     additional_info = f"Inferred details: {inferred_info}" if inferred_info else "No additional business details were inferred."
+    location_focus_info = "Focus on location-specific strategies." if location_focus else "No explicit focus on location-specific strategies."
+    campaign_focus_info = f"Specific focus: {campaign_focus}" if campaign_focus else "No specific campaign focus provided."
 
     query = f"""
     The user has provided the following details:
     - Content: {content if not fallback else "N/A (no content provided)"}
-    - Industry: {industry}
     - Goals for 2025: {goals}
     - Marketing budget for 2025: ${budget}
     - {location_info}
+    - {location_focus_info}
+    - {campaign_focus_info}
     - {additional_info}
 
     Create a detailed 1-year marketing plan that includes:
-    1. **Advanced Keywords**: Provide at least 10 long-tail keywords specific to the industry and location (if applicable).
-    2. **Content Topics**: Provide at least 10 blog, YouTube, or social media topics, each with a brief description.
-    3. **SEO Strategies**: Detailed recommendations for improving search rankings, including tools and methods.
-    4. **Content Marketing Plan**: How to leverage the provided content topics to achieve the stated goals.
-    5. **Social Media Strategies**: Platforms, posting frequency, campaign ideas, and location-specific tactics.
-    6. **Advertising Campaigns**: Platforms, budget allocation, target audience details, and creative strategies.
-    7. **Execution Timeline**: A quarterly breakdown of actionable steps with measurable KPIs.
+    1. **Overview Summary**: Summarize the key focus areas for the business to achieve its goals. Include video marketing as a top priority.
+    2. **Advanced Keywords**: Provide at least 10 long-tail keywords specific to the industry and location (if applicable).
+    3. **Content Topics**: Provide at least 10 blog, YouTube, or social media topics, each with a brief description.
+    4. **SEO Strategies**: Detailed recommendations for improving search rankings, including tools and methods.
+    5. **Content Marketing Plan**: How to leverage the provided content topics to achieve the stated goals.
+    6. **Social Media Strategies**: Platforms, posting frequency, campaign ideas, and location-specific tactics.
+    7. **Advertising Campaigns**: Platforms, budget allocation, target audience details, and creative strategies.
+    8. **Execution Timeline**: A quarterly breakdown of actionable steps with measurable KPIs.
 
     Ensure the recommendations are detailed, actionable, and tailored to the business's specific goals, budget, and location.
     Avoid generic suggestions and provide unique, high-value insights.
@@ -119,8 +123,9 @@ initial_messages = [{
     Go beyond generic suggestions, and include:
     - Specific, long-tail keywords to target.
     - Detailed content ideas, including blogs, videos, and social media campaigns.
-    - Unique strategies tailored to the business's industry, goals, and location.
+    - Unique strategies tailored to the business's goals, location, and target audience.
     - Innovative advertising campaigns and emerging platform recommendations.
+    - Video marketing as a critical strategy across all platforms.
     Ensure every suggestion is actionable and includes measurable KPIs."""
 }]
 
@@ -141,11 +146,18 @@ st.markdown("<h2 style='text-align: center; color: black;'>Enter Business Detail
 website_url = st.text_input("Enter your business website (optional)", placeholder="e.g., https://example.com")
 manual_details = st.text_area(
     "Enter details about your business (if no website is provided or cannot be scanned)", 
-    placeholder="E.g., Business name, industry, target audience, goals, and location."
+    placeholder="E.g., Business name, target audience, goals, and location."
 )
-industry = st.text_input("Industry (optional)", placeholder="E.g., Real Estate, Retail, Technology")
 goals = st.text_area("Goals for 2025 (optional)", placeholder="E.g., increase brand awareness, drive online sales")
 budget = st.number_input("Marketing Budget for 2025 ($)", min_value=1000, step=1000)
+
+# Additional inputs for focus areas
+location_focus = st.checkbox("Focus on location-specific strategies?")
+campaign_focus = st.text_input(
+    "Specific campaign focus (optional)", 
+    placeholder="E.g., lead generation, email campaigns, brand awareness"
+)
+
 generate_button = st.button('Generate Marketing Plan')
 
 # Process results on button click
@@ -166,7 +178,7 @@ if generate_button:
 
         messages = initial_messages.copy()
         st.session_state["reply"] = generate_marketing_plan(
-            content, industry, goals, budget, location, inferred_info, messages, fallback=fallback_mode
+            content, goals, budget, location_focus, campaign_focus, location, inferred_info, messages, fallback=fallback_mode
         )
         st.session_state["show_notice"] = False  # Remove the notice once the report is ready
 
