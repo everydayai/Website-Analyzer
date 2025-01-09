@@ -74,23 +74,16 @@ def infer_business_info_from_url(url):
     )
     return inferred_info["choices"][0]["message"]["content"]
 
-def extract_location(content):
+def generate_marketing_plan(content, industry, goals, budget, location, inferred_info, messages, fallback=False):
     """
-    Extract a possible location from the website content using regular expressions.
-    """
-    location_match = re.search(r'\b(?:serving|located in|offices in|based in)\s([\w\s,]+)', content, re.IGNORECASE)
-    return location_match.group(1).strip() if location_match else None
-
-def generate_marketing_plan(website_content, industry, goals, budget, location, inferred_info, messages, fallback=False):
-    """
-    Generates a marketing plan based on website content, industry, goals, and budget.
+    Generates a marketing plan based on provided content, industry, goals, and budget.
     """
     location_info = f"The business is located in {location}." if location else "No specific location was mentioned."
     additional_info = f"Inferred details: {inferred_info}" if inferred_info else "No additional business details were inferred."
 
     query = f"""
     The user has provided the following details:
-    - Website content: {website_content if not fallback else "N/A (website content could not be retrieved)"}
+    - Content: {content if not fallback else "N/A (no content provided)"}
     - Industry: {industry}
     - Goals for 2025: {goals}
     - Marketing budget for 2025: ${budget}
@@ -144,31 +137,38 @@ if "show_notice" not in st.session_state:
 st.markdown("<h1 style='text-align: center; color: black;'>2025 Marketing Planner</h1>", unsafe_allow_html=True)
 
 # User inputs
-col1, col2 = st.columns(2)
-with col1:
-    st.markdown("<h2 style='text-align: center; color: black;'>Enter Business Details</h2>", unsafe_allow_html=True)
-    website_url = st.text_input("Enter your business website", placeholder="e.g., https://example.com")
-    industry = st.text_input("Industry (optional)", placeholder="E.g., Real Estate, Retail, Technology")
-    goals = st.text_area("Goals for 2025 (optional)", placeholder="E.g., increase brand awareness, drive online sales")
-    budget = st.number_input("Marketing Budget for 2025 ($)", min_value=1000, step=1000)
-    generate_button = st.button('Generate Marketing Plan')
+st.markdown("<h2 style='text-align: center; color: black;'>Enter Business Details</h2>", unsafe_allow_html=True)
+website_url = st.text_input("Enter your business website (optional)", placeholder="e.g., https://example.com")
+manual_details = st.text_area(
+    "Enter details about your business (if no website is provided or cannot be scanned)", 
+    placeholder="E.g., Business name, industry, target audience, goals, and location."
+)
+industry = st.text_input("Industry (optional)", placeholder="E.g., Real Estate, Retail, Technology")
+goals = st.text_area("Goals for 2025 (optional)", placeholder="E.g., increase brand awareness, drive online sales")
+budget = st.number_input("Marketing Budget for 2025 ($)", min_value=1000, step=1000)
+generate_button = st.button('Generate Marketing Plan')
 
 # Process results on button click
 if generate_button:
     st.session_state["show_notice"] = True
-    with st.spinner("Analyzing website content and preparing your report..."):
+    with st.spinner("Analyzing provided details and preparing your report..."):
+        # Attempt to scrape website content if a URL is provided
         website_content, scrape_successful = scrape_website(website_url) if website_url else ("", False)
         location = extract_location(website_content) if scrape_successful else None
-        inferred_info = infer_business_info_from_url(website_url) if not scrape_successful else None
-    fallback_mode = not scrape_successful
-    if fallback_mode:
-        st.warning("Unable to retrieve website content. Generating recommendations based on inferred details.")
-    messages = initial_messages.copy()
-    st.session_state["reply"] = generate_marketing_plan(
-        website_content if scrape_successful else "N/A", 
-        industry, goals, budget, location, inferred_info, messages, fallback=fallback_mode
-    )
-    st.session_state["show_notice"] = False  # Remove the notice once the report is ready
+        inferred_info = infer_business_info_from_url(website_url) if not scrape_successful and website_url else None
+
+        # Use manual details as fallback content
+        content = website_content if scrape_successful else manual_details
+        fallback_mode = not scrape_successful and not manual_details
+
+        if fallback_mode:
+            st.warning("No valid website content or manual details provided. Please enter business details.")
+
+        messages = initial_messages.copy()
+        st.session_state["reply"] = generate_marketing_plan(
+            content, industry, goals, budget, location, inferred_info, messages, fallback=fallback_mode
+        )
+        st.session_state["show_notice"] = False  # Remove the notice once the report is ready
 
 # Display the waiting notice
 if st.session_state["show_notice"]:
@@ -176,6 +176,5 @@ if st.session_state["show_notice"]:
 
 # Display results if there is a reply in session state
 if st.session_state["reply"]:
-    with col2:
-        st.markdown("<h2 style='text-align: center; color: black;'>Your 2025 Marketing Plan ⬇️</h2>", unsafe_allow_html=True)
-        st.markdown(st.session_state["reply"])
+    st.markdown("<h2 style='text-align: center; color: black;'>Your 2025 Marketing Plan ⬇️</h2>", unsafe_allow_html=True)
+    st.markdown(st.session_state["reply"])
