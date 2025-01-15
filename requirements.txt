@@ -1,6 +1,5 @@
-streamlit
+streamlit>=1.10
 openai==0.27.0
-requests==2.31.0
-beautifulsoup4==4.12.2
-altair
-
+requests>=2.31.0
+beautifulsoup4>=4.12.2
+altair>=4.2.0
